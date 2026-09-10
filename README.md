@@ -1,2 +1,2 @@
-# serverpe-gatepe-admin-front-end
-Admin Application — Centralized control for ticketing, capacity, payments, QR verification, crowd management, fraud prevention and real-time operational monitoring.
+# serverpe-admin-front-end
+Admin panel for ticket booking for visiting places for monitoring &amp; configuration, staff CRUD operations and more.
