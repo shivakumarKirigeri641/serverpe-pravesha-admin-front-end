@@ -1,15 +1,18 @@
 /**
- * Every QR code ever issued, and what has been attempted against it.
+ * Every ticket issued, and what happened to it at the gate.
  *
- * A bookings list shows what was sold. This shows what happened to the code
- * afterwards, which is a different question and the one that matters: a ticket
- * scanned three times, twice refused, looks entirely ordinary on a bookings
- * list and is the single most interesting row in the system.
+ * A bookings list shows what was sold. This shows what happened afterwards,
+ * which is a different question and the one that matters: a vehicle presented
+ * three times, twice refused, looks entirely ordinary on a bookings list and is
+ * the single most interesting row in the system.
  *
- * The QR image and the payment link are shown here only while the panel is
- * configured to allow it. They are on now because there are no gate phones yet
- * and the codes have to be scanned from somewhere; a banner says so, and the
- * switch is in Settings rather than in a comment somebody has to remember.
+ * THIS WAS THE QR PAGE. Entry is no longer by scanned code — the staff member
+ * reads the number plate and types it, and the gate looks the vehicle up. So
+ * there is no image to render here and nothing on this screen is a credential
+ * any more; what is left is the ticket, its state, and its history.
+ *
+ * The payment link is still withheld behind a setting, because a live checkout
+ * URL is payable by anyone who photographs the screen.
  */
 
 import { useEffect, useState } from 'react';
@@ -28,7 +31,7 @@ const FILTERS = [
   ['cancelled', 'Cancelled'],
 ];
 
-export default function QRCodes() {
+export default function Tickets() {
   const [state, setState] = useState('all');
   const [q, setQ] = useState('');
   const [data, setData] = useState(null);
@@ -44,39 +47,39 @@ export default function QRCodes() {
 
   const c = data?.counts || {};
 
-  /* Images are fetched with the token, so they cannot be plain <img src>. */
-  const [imgs, setImgs] = useState({});
+  /* The ticket card as the visitor received it, fetched with the token so it
+     cannot be a plain <img src>. Kept for support — when somebody rings to say
+     their ticket looks wrong, this is what they are looking at. */
+  const [card, setCard] = useState(null);
   useEffect(() => {
-    if (!open || !data?.show_qr) return undefined;
+    if (!open) return undefined;
     let dead = false;
-    const urls = [];
+    let url;
     (async () => {
-      for (const kind of ['qr', 'card']) {
-        const res = await fetch(`${API_BASE}/admin/api/tickets/${open.ticket_no}/${kind}.png`,
-          { headers: { Authorization: `Bearer ${getToken()}` } });
-        if (!res.ok) continue;
-        const url = URL.createObjectURL(await res.blob());
-        urls.push(url);
-        if (!dead) setImgs((p) => ({ ...p, [kind]: url }));
-      }
+      const res = await fetch(`${API_BASE}/admin/api/tickets/${open.ticket_no}/card.png`,
+        { headers: { Authorization: `Bearer ${getToken()}` } });
+      if (!res.ok) return;
+      url = URL.createObjectURL(await res.blob());
+      if (!dead) setCard(url); else URL.revokeObjectURL(url);
     })();
-    return () => { dead = true; urls.forEach(URL.revokeObjectURL); setImgs({}); };
-  }, [open, data?.show_qr]);
+    return () => { dead = true; if (url) URL.revokeObjectURL(url); setCard(null); };
+  }, [open]);
+
 
   return (
     <>
-      <PageHead title="QR codes"
-                subtitle="Every ticket issued, its state, and every scan attempted against it." />
+      <PageHead title="Tickets"
+                subtitle="Every ticket issued, its state, and every entry attempted against it." />
 
       {data?.show_qr && (
         <div className="card border-l-4 border-l-pending p-3.5 mb-5">
           <div className="text-sm font-semibold text-pending">
-            QR codes and payment links are visible in this panel
+            Live payment links are visible in this panel
           </div>
           <p className="text-2xs text-ink-600 mt-0.5">
-            Switched on for testing while there are no gate phones. A QR on a screen is a working
-            ticket to anyone who photographs it — turn this off under Pricing &amp; settings
-            (<span className="font-mono">show_qr_in_admin</span>) before real operation.
+            A checkout link on a screen is payable by anyone who photographs it. Turn this off
+            under Pricing &amp; settings (<span className="font-mono">show_qr_in_admin</span>)
+            before real operation.
           </p>
         </div>
       )}
@@ -241,38 +244,22 @@ export default function QRCodes() {
               </div>
             )}
 
-            {data?.show_qr && (
-              <div className="card p-4">
-                <div className="label mb-2">The code itself — for testing a scan</div>
-                {imgs.qr ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <img src={imgs.qr} alt="QR" className="w-56 h-56" />
-                    {imgs.card && (
-                      <details className="w-full">
-                        <summary className="cursor-pointer text-xs text-forest-700">
-                          Show the full ticket as the visitor received it
-                        </summary>
-                        <img src={imgs.card} alt="Ticket" className="mt-2 w-full rounded border
-                                                                     border-ink-300/50" />
-                      </details>
-                    )}
+            <div className="card p-4">
+              <div className="label mb-2">The ticket as the visitor received it</div>
+              {card ? (
+                <img src={card} alt="Ticket" className="w-full rounded border border-ink-300/50" />
+              ) : (
+                <p className="text-sm text-ink-500 py-6 text-center">Loading the ticket…</p>
+              )}
+              {data?.show_qr && open.checkout_url && (
+                <div className="mt-3">
+                  <div className="label">Payment link</div>
+                  <div className="mt-1 rounded bg-paper-sunken p-2 font-mono text-2xs break-all">
+                    {open.checkout_url}
                   </div>
-                ) : (
-                  <p className="text-sm text-ink-500 py-6 text-center">
-                    {open.status === 'cancelled' ? 'Cancelled tickets carry no code.'
-                      : 'Loading the code…'}
-                  </p>
-                )}
-                {open.checkout_url && (
-                  <div className="mt-3">
-                    <div className="label">Payment link</div>
-                    <div className="mt-1 rounded bg-paper-sunken p-2 font-mono text-2xs break-all">
-                      {open.checkout_url}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </Drawer>

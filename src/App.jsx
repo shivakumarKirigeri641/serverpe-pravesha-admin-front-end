@@ -16,7 +16,7 @@ import { Toaster, Loading } from './components/ui';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Live from './pages/Live';
-import QRCodes from './pages/QRCodes';
+import Tickets from './pages/Tickets';
 import Upcoming from './pages/Upcoming';
 import Analytics from './pages/Analytics';
 import Customers from './pages/Customers';
@@ -81,7 +81,9 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/live" element={<Live />} />
           <Route path="/upcoming" element={<Upcoming />} />
-          <Route path="/qr" element={<QRCodes />} />
+          <Route path="/tickets" element={<Tickets />} />
+          {/* The old address, kept so a bookmarked link still lands somewhere. */}
+          <Route path="/qr" element={<Navigate to="/tickets" replace />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/customers" element={<Customers admin={admin} />} />
           <Route path="/vehicles" element={<Vehicles />} />

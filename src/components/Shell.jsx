@@ -18,7 +18,7 @@ const GROUPS = [
       { to: '/live', label: 'Live', live: true },
       { to: '/upcoming', label: 'Upcoming' },
       { to: '/bookings', label: 'Bookings' },
-      { to: '/qr', label: 'QR codes' },
+      { to: '/tickets', label: 'Tickets' },
       { to: '/gate', label: 'Gate log' },
       { to: '/staff-checks', label: 'Staff checks' },
       { to: '/messages', label: 'Messages' },

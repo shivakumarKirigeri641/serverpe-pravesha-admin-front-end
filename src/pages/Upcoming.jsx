@@ -153,9 +153,10 @@ export default function Upcoming() {
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{plate(b.reg_no)}</span>
                       <span className="font-mono text-2xs text-ink-500">{b.ticket_no}</span>
-                      {b.has_qr
-                        ? <Pill tone="allowed">QR issued</Pill>
-                        : <Pill tone="pending">Awaiting payment</Pill>}
+                      {b.status === 'used'
+                        ? <Pill tone="allowed">Entered</Pill>
+                        : <Pill tone="forest">Booked</Pill>}
+                      {b.category_declared && <Pill tone="pending">Type declared</Pill>}
                     </div>
                     <div className="mt-1 text-2xs text-ink-500 truncate">
                       {b.wa_profile_name || 'Visitor'} · {b.mobile} · {b.category_label}
