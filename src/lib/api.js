@@ -129,6 +129,35 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  /* Settings. Every change carries a reason; the server refuses one without. */
+  pricing: (placeId) => call(`/settings/pricing${placeId ? `?placeId=${placeId}` : ''}`),
+  updatePricing: (body) => call('/settings/pricing', { method: 'PUT', body }),
+  slots: (placeId) => call(`/settings/slots${placeId ? `?placeId=${placeId}` : ''}`),
+  createSlot: (body) => call('/settings/slots', { method: 'POST', body }),
+  updateSlot: (id, body) => call(`/settings/slots/${id}`, { method: 'PUT', body }),
+  deleteSlot: (id, reason) => call(`/settings/slots/${id}`, { method: 'DELETE', body: { reason } }),
+  staff: () => call('/settings/staff'),
+  addStaff: (body) => call('/settings/staff', { method: 'POST', body }),
+  updateStaff: (id, body) => call(`/settings/staff/${id}`, { method: 'PUT', body }),
+  setStaffActive: (id, active, reason) => call(`/settings/staff/${id}/active`, { method: 'POST', body: { active, reason } }),
+  resetStaffPin: (id, reason) => call(`/settings/staff/${id}/reset-pin`, { method: 'POST', body: { reason } }),
+  staffActivity: (id) => call(`/settings/staff/${id}/activity`),
+  users: () => call('/settings/users'),
+  addUser: (body) => call('/settings/users', { method: 'POST', body }),
+  updateUser: (id, body) => call(`/settings/users/${id}`, { method: 'PUT', body }),
+  setUserActive: (id, active, reason) => call(`/settings/users/${id}/active`, { method: 'POST', body: { active, reason } }),
+  resetUserPassword: (id, reason) => call(`/settings/users/${id}/reset-password`, { method: 'POST', body: { reason } }),
+  permissions: () => call('/settings/permissions'),
+  gst: () => call('/settings/gst'),
+  updateGst: (body) => call('/settings/gst', { method: 'PUT', body }),
+  ticketAvailability: (date) => call(`/tickets/availability${date ? `?date=${date}` : ''}`),
+  ticketGrants: (kind) => call(`/tickets/grants${kind ? `?kind=${kind}` : ''}`),
+  issueFree: (body) => call('/tickets/free', { method: 'POST', body }),
+  issueOnspot: (body) => call('/tickets/onspot', { method: 'POST', body }),
+  audit: (params = {}) => {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''));
+    return call(`/audit?${qs}`);
+  },
   liveActivity: ({ before = null, limit = 25 } = {}) =>
     call(`/live/activity?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}`),
 };

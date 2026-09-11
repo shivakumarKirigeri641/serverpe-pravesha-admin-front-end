@@ -129,7 +129,7 @@ export default function Analytics() {
       {usesRange && loading && !data && <div className="card h-72 animate-pulse" />}
 
       {tab === 'traffic' && data && <Traffic data={data} loading={loading} />}
-      {tab === 'daily' && data && <Daily rows={data.daily} />}
+      {tab === 'daily' && data && <Daily rows={data.daily} money={!data.financeHidden} />}
       {tab === 'staff' && data && <Staff rows={data.staff} />}
       {tab === 'compare' && <Compare today={today} />}
       {tab === 'visitors' && <Visitors bands={data?.visitors} />}
@@ -294,21 +294,21 @@ function PeakRow({ label, hi, loLabel, lo }) {
 
 /* ─────────────────────────────────────────────────────────── day-wise ── */
 
-function Daily({ rows }) {
+function Daily({ rows, money = true }) {
   const totals = rows.reduce((a, r) => ({
     visitors: a.visitors + r.visitors, vehicles: a.vehicles + r.vehicles, bikes: a.bikes + r.bikes,
     cars: a.cars + r.cars, toofans: a.toofans + r.toofans, tts: a.tts + r.tts, revenue: a.revenue + r.revenue,
   }), { visitors: 0, vehicles: 0, bikes: 0, cars: 0, toofans: 0, tts: 0, revenue: 0 });
 
   return (
-    <Card title="Day by day" note="Newest first · revenue is the value of passes for that date">
+    <Card title="Day by day" note={money ? 'Newest first · revenue is the value of passes for that date' : 'Newest first'}>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px]">
           <thead className="border-b border-line bg-shell">
             <tr>
               <th className="th">Date</th><th className="th text-right">Visitors</th><th className="th text-right">Vehicles</th>
               <th className="th text-right">🏍️ Bikes</th><th className="th text-right">🚗 Cars</th>
-              <th className="th text-right">🚙 Toofan</th><th className="th text-right">🚐 TT</th><th className="th text-right">Revenue</th>
+              <th className="th text-right">🚙 Toofan</th><th className="th text-right">🚐 TT</th>{money && <th className="th text-right">Revenue</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -321,7 +321,7 @@ function Daily({ rows }) {
                 <td className="td tabular text-right text-muted">{number(r.cars)}</td>
                 <td className="td tabular text-right text-muted">{number(r.toofans)}</td>
                 <td className="td tabular text-right text-muted">{number(r.tts)}</td>
-                <td className="td tabular text-right text-ink">{rupees(r.revenue)}</td>
+                {money && <td className="td tabular text-right text-ink">{rupees(r.revenue)}</td>}
               </tr>
             ))}
           </tbody>
@@ -334,7 +334,7 @@ function Daily({ rows }) {
               <td className="td tabular text-right">{number(totals.cars)}</td>
               <td className="td tabular text-right">{number(totals.toofans)}</td>
               <td className="td tabular text-right">{number(totals.tts)}</td>
-              <td className="td tabular text-right">{rupees(totals.revenue)}</td>
+              {money && <td className="td tabular text-right">{rupees(totals.revenue)}</td>}
             </tr>
           </tfoot>
         </table>
@@ -420,7 +420,7 @@ function Compare({ today }) {
                 <CompareRow label="Visitors" stat={data.visitors} />
                 <CompareRow label="Vehicles entered" stat={data.vehicles} />
                 <CompareRow label="Passes booked" stat={data.passes} />
-                <CompareRow label="Revenue" stat={data.revenue} money />
+                {data.revenue && <CompareRow label="Revenue" stat={data.revenue} money />}
                 <CompareRow label="Vehicles per day" stat={data.perDay} />
                 {data.byCategory.map((c) => (
                   <CompareRow key={c.code} label={<><span className="mr-1.5" aria-hidden>{VEHICLE_ICON[c.code]}</span>{c.label}</>} stat={c} />

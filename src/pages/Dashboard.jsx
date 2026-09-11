@@ -163,7 +163,14 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <Revenue revenue={data.revenue} config={data.config} />
+            {data.revenue ? <Revenue revenue={data.revenue} config={data.config} /> : (
+              <div className="card grid place-items-center px-6 py-10 text-center">
+                <div>
+                  <div className="text-sm font-semibold text-ink">Revenue is not shown for your role</div>
+                  <p className="mt-1 max-w-xs text-2xs text-muted">Revenue, GST and the financial split are shown to roles with finance access.</p>
+                </div>
+              </div>
+            )}
           </section>
 
           <section>

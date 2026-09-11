@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
-import { useSession } from '../lib/session';
+import { useSession, can } from '../lib/session';
 import { clock, dayLabel, plate } from '../lib/format';
 
 /*
@@ -163,7 +163,7 @@ export default function Conversations() {
         </section>
 
         {/* Profile */}
-        {thread && <Profile thread={thread} isAdmin={me?.can?.configure} />}
+        {thread && <Profile thread={thread} isAdmin={can(me, 'conversations.technical')} />}
       </div>
     </Shell>
   );

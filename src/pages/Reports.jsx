@@ -153,6 +153,11 @@ export default function Reports() {
           )}
         </div>
 
+        {report?.financeHidden ? (
+          <p className="max-w-sm text-2xs text-muted">
+            Issued reports include revenue and GST, so generating PDF, Excel or CSV files needs finance access. The figures below are yours to use.
+          </p>
+        ) : (
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className="btn-primary" disabled={!report || busy} onClick={() => obtain('pdf', 'open')}>
             {busy === 'pdf:open' ? 'Generating…' : 'Generate PDF'}
@@ -172,6 +177,7 @@ export default function Reports() {
             {busy === 'csv:save' ? 'Preparing…' : 'Export CSV'}
           </button>
         </div>
+        )}
       </div>
 
       {notice && <div className="mb-4 rounded-lg border border-good-500/25 bg-good-50 px-4 py-2.5 text-sm font-medium text-good-700">{notice} It is in the register below.</div>}
@@ -183,8 +189,8 @@ export default function Reports() {
         <div className={`space-y-6 ${loading ? 'opacity-60' : ''}`}>
           <Summary report={report} />
           {report.period.kind === 'daily' ? <DailyDetail report={report} /> : <PeriodDetail report={report} />}
-          <Finance report={report} />
-          <RevenueGraphs report={report} />
+          {report.finance && <Finance report={report} />}
+          {report.finance && <RevenueGraphs report={report} />}
           <Operations report={report} />
           <Register rows={history} />
         </div>
@@ -231,7 +237,7 @@ function Summary({ report }) {
   const s = report.summary;
   const f = report.finance;
   return (
-    <Section title="Executive summary" note="Operations by travel date · money by payment date">
+    <Section title="Executive summary" note={f ? 'Operations by travel date · money by payment date' : 'Operations by travel date'}>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         <Figure label="Total bookings" value={number(s.bookings)} sub={`${pc(s.occupancy)} of capacity`} />
         <Figure label="Total entries" value={number(s.entries)} sub={`${pc(s.showUpRate)} of bookings`} />
@@ -240,11 +246,13 @@ function Summary({ report }) {
         <Figure label="Invalid" value={number(s.invalid)} sub={`${pc(s.invalidRate)} of look-ups`} tone="text-wrong-700" />
         <Figure label="Duplicate" value={number(s.duplicate)} sub={`${pc(s.duplicateRate)} of look-ups`} tone="text-wrong-700" />
         <Figure label="Visitors" value={number(s.visitors)} sub={`${number(report.visitors.new)} new · ${number(report.visitors.returning)} returning`} />
+        {f && <>
         <Figure label="Collected" value={rupees(f.collected)} sub={`${number(f.payments)} payments`} />
         <Figure label="Department" value={rupees(f.department)} sub="entry fees" />
         <Figure label="Service fee" value={rupees(f.serviceFee)} sub={`${f.serviceFeePercent}% · includes GST`} />
         <Figure label="GST" value={rupees(f.gst)} sub={`${f.gstPercent}% within the fee`} />
         <Figure label="Refunds" value={rupees(f.refunds)} sub={`${number(f.refundCount)} refunded`} />
+        </>}
       </div>
       <p className="mt-3 text-2xs text-muted">
         Cancellations are not reported: a visitor cannot cancel a pass in the product, so the figure could only be zero.
@@ -280,7 +288,7 @@ function PeriodDetail({ report }) {
                 <th className="th">Day</th><th className="th text-right">Bookings</th><th className="th text-right">Entries</th>
                 <th className="th text-right">🏍️ Bikes</th><th className="th text-right">🚗 Cars</th><th className="th text-right">🚙 Toofan</th>
                 <th className="th text-right">🚐 TT</th><th className="th text-right">Skipped</th><th className="th text-right">Invalid</th>
-                <th className="th text-right">Collected</th>
+                {report.finance && <th className="th text-right">Collected</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -295,7 +303,7 @@ function PeriodDetail({ report }) {
                   <td className="td tabular text-right text-muted">{number(d.tts)}</td>
                   <td className="td tabular text-right text-watch-700">{number(d.skipped)}</td>
                   <td className="td tabular text-right text-wrong-700">{number(d.invalid)}</td>
-                  <td className="td tabular text-right text-ink">{rupees(d.collected)}</td>
+                  {report.finance && <td className="td tabular text-right text-ink">{rupees(d.collected)}</td>}
                 </tr>
               ))}
             </tbody>
@@ -305,7 +313,7 @@ function PeriodDetail({ report }) {
                 {['bookings', 'entries', 'bikes', 'cars', 'toofans', 'tts', 'skipped', 'invalid'].map((k) => (
                   <td key={k} className="td tabular text-right">{number(report.daily.reduce((a, d) => a + d[k], 0))}</td>
                 ))}
-                <td className="td tabular text-right">{rupees(report.daily.reduce((a, d) => a + d.collected, 0))}</td>
+                {report.finance && <td className="td tabular text-right">{rupees(report.daily.reduce((a, d) => a + d.collected, 0))}</td>}
               </tr>
             </tfoot>
           </table>
@@ -316,9 +324,11 @@ function PeriodDetail({ report }) {
         <Figure label="Highest traffic day" value={report.peaks.highestDay ? number(report.peaks.highestDay.entries) : '—'} sub={report.peaks.highestDay && dayLabel(report.peaks.highestDay.day)} />
         <Figure label="Lowest traffic day" value={report.peaks.lowestDay ? number(report.peaks.lowestDay.entries) : '—'} sub={report.peaks.lowestDay && dayLabel(report.peaks.lowestDay.day)} />
         <Figure label="Peak hour" value={report.peaks.peakHour ? report.peaks.peakHour.label : '—'} sub={report.peaks.peakHour && `${number(report.peaks.peakHour.entries)} entries`} />
+        {report.finance && <>
         <Figure label="Total revenue" value={rupees(report.finance.collected)} sub="collected" />
         <Figure label="Pravesha fee" value={rupees(report.finance.serviceFee)} sub={`net ${rupees(report.finance.netPravesha)}`} />
         <Figure label="Department" value={rupees(report.finance.department)} sub="entry fees collected" />
+        </>}
       </div>
 
       {monthlyish && (
@@ -396,7 +406,7 @@ function VehicleTable({ report }) {
     <Card title="Vehicle breakdown" note="By travel date">
       <table className="w-full">
         <thead className="border-b border-line bg-shell">
-          <tr><th className="th">Type</th><th className="th text-right">Passes</th><th className="th text-right">Entries</th><th className="th text-right">Share</th><th className="th text-right">Pass value</th></tr>
+          <tr><th className="th">Type</th><th className="th text-right">Passes</th><th className="th text-right">Entries</th><th className="th text-right">Share</th>{report.finance && <th className="th text-right">Pass value</th>}</tr>
         </thead>
         <tbody className="divide-y divide-line">
           {report.vehicles.map((v) => (
@@ -405,7 +415,7 @@ function VehicleTable({ report }) {
               <td className="td tabular text-right">{number(v.passes)}</td>
               <td className="td tabular text-right font-semibold text-ink">{number(v.entries)}</td>
               <td className="td tabular text-right text-muted">{pc(v.shareOfEntries)}</td>
-              <td className="td tabular text-right text-ink">{rupees(v.passValue)}</td>
+              {report.finance && <td className="td tabular text-right text-ink">{rupees(v.passValue)}</td>}
             </tr>
           ))}
         </tbody>

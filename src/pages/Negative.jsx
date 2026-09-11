@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
-import { useSession } from '../lib/session';
+import { useSession, can } from '../lib/session';
 import { clock, dayLabel, number, percent, plate } from '../lib/format';
 
 /*
@@ -87,7 +87,8 @@ export default function Negative() {
   }, [filter, loadFeed]);
 
   const goPage = (next) => { setPage(next); loadFeed(next, cursors); };
-  const canOperate = Boolean(me?.can?.operate);
+  const canOperate = can(me, 'negative.act');
+  const canBlock = can(me, 'visitors.block');
 
   return (
     <Shell
@@ -151,7 +152,7 @@ export default function Negative() {
       )}
 
       {profile && (
-        <ProfileDrawer profile={profile} canOperate={canOperate} onClose={() => setProfile(null)}
+        <ProfileDrawer profile={profile} canOperate={canOperate} canBlock={canBlock} onClose={() => setProfile(null)}
           onChanged={() => { loadOverview(); loadFeed(page, cursors); }} />
       )}
     </Shell>
@@ -412,7 +413,7 @@ const Detail = ({ label, value }) => (
 );
 
 /** A vehicle's or visitor's whole history, and the actions available. */
-function ProfileDrawer({ profile, canOperate, onClose, onChanged }) {
+function ProfileDrawer({ profile, canOperate, canBlock, onClose, onChanged }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [note, setNote] = useState('');
@@ -556,7 +557,7 @@ function ProfileDrawer({ profile, canOperate, onClose, onChanged }) {
                   <button type="button" className="btn-quiet" disabled={busy || !note.trim()} onClick={() => act('note')}>Add note</button>
                 </div>
 
-                {profile.type === 'visitor' && (
+                {profile.type === 'visitor' && canBlock && (
                   <div className="border-t border-line pt-3">
                     {data.visitor.blocked ? (
                       <button type="button" className="btn-quiet" disabled={busy} onClick={() => block(false)}>Unblock this number</button>

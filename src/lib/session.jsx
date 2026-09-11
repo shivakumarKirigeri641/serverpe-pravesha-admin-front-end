@@ -50,3 +50,12 @@ export function SessionProvider({ children }) {
 }
 
 export const useSession = () => useContext(Ctx);
+
+/** May the signed-in person do this? `cap` may be a list, any one of which is enough. */
+export const can = (me, cap) => {
+  /* A back-end that predates capabilities sends none: show the menu and let
+     the server refuse what the role may not do, rather than hiding everything. */
+  if (me && !Array.isArray(me.capabilities)) return true;
+  const have = me?.capabilities || [];
+  return (Array.isArray(cap) ? cap : [cap]).some((c) => have.includes(c));
+};

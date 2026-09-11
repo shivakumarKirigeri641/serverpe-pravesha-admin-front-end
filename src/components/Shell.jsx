@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { useSession } from '../lib/session';
+import { useSession, can } from '../lib/session';
 
 /*
  * The frame every screen sits in: a fixed sidebar on a desk, a drawer on a
@@ -10,26 +10,30 @@ import { useSession } from '../lib/session';
  * are built — a menu full of dead links is how an admin panel loses the trust of
  * the person using it. `soon: true` renders an item as a disabled label rather
  * than a link, so the shape of what is coming is visible without pretending.
+ *
+ * AND ONLY WHAT YOU MAY OPEN. `cap` is the capability the screen's API demands
+ * (any one of a list will do); an item the role lacks is not drawn at all.
  */
 
 const NAV = [
   {
     group: 'Watch',
     items: [
-      { to: '/', label: 'Dashboard', icon: GridIcon, end: true },
-      { to: '/live', label: 'Live monitoring', icon: PulseIcon },
-      { to: '/analytics', label: 'Data analytics', icon: ChartIcon },
-      { to: '/reports', label: 'Reports', icon: ReportIcon },
-      { to: '/negative', label: 'Negative tracking', icon: AlertIcon },
+      { to: '/', label: 'Dashboard', icon: GridIcon, end: true, cap: 'dashboard.view' },
+      { to: '/live', label: 'Live monitoring', icon: PulseIcon, cap: 'live.view' },
+      { to: '/analytics', label: 'Data analytics', icon: ChartIcon, cap: 'analytics.view' },
+      { to: '/reports', label: 'Reports', icon: ReportIcon, cap: 'reports.view' },
+      { to: '/negative', label: 'Negative tracking', icon: AlertIcon, cap: 'negative.view' },
     ],
   },
   {
     group: 'Operate',
     items: [
-      { to: '/conversations', label: 'Conversations', icon: ChatIcon },
+      { to: '/conversations', label: 'Conversations', icon: ChatIcon, cap: 'conversations.view' },
+      { to: '/settings/passes', label: 'Free & on-spot passes', icon: TicketIcon, cap: ['tickets.free', 'tickets.onspot'] },
       { to: '/bookings', label: 'Bookings', icon: TicketIcon, soon: true },
       { to: '/capacity', label: 'Capacity & closures', icon: SlidersIcon, soon: true },
-      { to: '/staff', label: 'Checkpost staff', icon: UsersIcon, soon: true },
+      { to: '/settings/staff', label: 'Checkpost staff', icon: UsersIcon, cap: 'settings.staff' },
     ],
   },
   {
@@ -42,8 +46,10 @@ const NAV = [
   {
     group: 'Administer',
     items: [
-      { to: '/settings', label: 'Settings & content', icon: CogIcon, soon: true },
-      { to: '/audit', label: 'Audit trail', icon: ShieldIcon, soon: true },
+      { to: '/settings', label: 'Settings', icon: CogIcon, cap: ['settings.pricing', 'settings.slots', 'settings.staff', 'settings.users', 'settings.gst', 'tickets.free', 'tickets.onspot'],
+        /* Staff and passes have their own entries above; everything else under /settings is here. */
+        match: (path) => path.startsWith('/settings') && !/^\/settings\/(staff|passes)/.test(path) },
+      { to: '/audit', label: 'Audit trail', icon: ShieldIcon, cap: 'audit.view' },
     ],
   },
 ];
@@ -51,6 +57,7 @@ const NAV = [
 export default function Shell({ title, subtitle, actions, children }) {
   const { me, signOut } = useSession();
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
 
   return (
     <div className="min-h-screen lg:flex">
@@ -65,7 +72,9 @@ export default function Shell({ title, subtitle, actions, children }) {
         </div>
 
         <nav className="h-[calc(100vh-3.5rem)] overflow-y-auto px-3 py-4">
-          {NAV.map((section) => (
+          {NAV.map((section) => ({ ...section, items: section.items.filter((i) => !i.cap || can(me, i.cap)) }))
+            .filter((section) => section.items.some((i) => !i.soon))
+            .map((section) => (
             <div key={section.group} className="mb-5">
               <div className="px-2 pb-1.5 text-2xs font-semibold uppercase tracking-wider text-muted/80">{section.group}</div>
               <ul className="space-y-0.5">
@@ -81,7 +90,7 @@ export default function Shell({ title, subtitle, actions, children }) {
                       <NavLink
                         to={item.to} end={item.end} onClick={() => setOpen(false)}
                         className={({ isActive }) => `flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition ${
-                          isActive ? 'bg-brand text-white' : 'text-body hover:bg-shell hover:text-ink'}`}
+                          (item.match ? item.match(pathname) : isActive) ? 'bg-brand text-white' : 'text-body hover:bg-shell hover:text-ink'}`}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
                         {item.label}
@@ -116,7 +125,7 @@ export default function Shell({ title, subtitle, actions, children }) {
           <div className="flex items-center gap-2 border-l border-line pl-3">
             <div className="hidden text-right sm:block">
               <div className="text-[13px] font-semibold leading-tight text-ink">{me?.name}</div>
-              <div className="text-2xs capitalize text-muted">{me?.role}</div>
+              <div className="text-2xs text-muted">{me?.roleLabel || me?.role}</div>
             </div>
             <button type="button" onClick={signOut} className="btn-quiet !px-3 !py-1.5 text-2xs">Sign out</button>
           </div>

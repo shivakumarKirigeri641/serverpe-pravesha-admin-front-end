@@ -5,8 +5,10 @@ import Analytics from './pages/Analytics.jsx';
 import Conversations from './pages/Conversations.jsx';
 import Reports from './pages/Reports.jsx';
 import Negative from './pages/Negative.jsx';
+import Settings from './pages/Settings.jsx';
+import Audit from './pages/Audit.jsx';
 import SignIn from './pages/SignIn.jsx';
-import { useSession } from './lib/session';
+import { useSession, can } from './lib/session';
 
 /*
  * Routes are added as each screen is built, so the URL space and the navigation
@@ -14,7 +16,7 @@ import { useSession } from './lib/session';
  * is a tool, not a website, and there is always somewhere useful to be.
  */
 export default function App() {
-  const { state } = useSession();
+  const { state, me } = useSession();
 
   if (state === 'checking') {
     return (
@@ -32,11 +34,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
-      <Route path="/live" element={<Live />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="/conversations" element={<Conversations />} />
-      <Route path="/reports" element={<Reports />} />
-      <Route path="/negative" element={<Negative />} />
+      {can(me, 'live.view') && <Route path="/live" element={<Live />} />}
+      {can(me, 'analytics.view') && <Route path="/analytics" element={<Analytics />} />}
+      {can(me, 'conversations.view') && <Route path="/conversations" element={<Conversations />} />}
+      {can(me, 'reports.view') && <Route path="/reports" element={<Reports />} />}
+      {can(me, 'negative.view') && <Route path="/negative" element={<Negative />} />}
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/settings/:tab" element={<Settings />} />
+      {can(me, 'audit.view') && <Route path="/audit" element={<Audit />} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
