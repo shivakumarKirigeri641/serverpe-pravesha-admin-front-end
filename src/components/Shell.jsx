@@ -24,6 +24,7 @@ const NAV = [
   {
     group: 'Operate',
     items: [
+      { to: '/conversations', label: 'Conversations', icon: ChatIcon },
       { to: '/bookings', label: 'Bookings', icon: TicketIcon, soon: true },
       { to: '/capacity', label: 'Capacity & closures', icon: SlidersIcon, soon: true },
       { to: '/staff', label: 'Checkpost staff', icon: UsersIcon, soon: true },
@@ -133,6 +134,7 @@ const Svg = ({ className = 'h-4 w-4', children }) => (
 );
 
 function GridIcon(p) { return <Svg {...p}><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></Svg>; }
+function ChatIcon(p) { return <Svg {...p}><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /><path d="M8.5 11h7M8.5 14h4" /></Svg>; }
 function ChartIcon(p) { return <Svg {...p}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></Svg>; }
 function PulseIcon(p) { return <Svg {...p}><path d="M3 12h4l3-8 4 16 3-8h4" /></Svg>; }
 function TicketIcon(p) { return <Svg {...p}><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6Z" /><path d="M13 5v14" strokeDasharray="2 3" /></Svg>; }

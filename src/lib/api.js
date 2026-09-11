@@ -87,6 +87,8 @@ export const api = {
   },
   analyticsVisitor: (id) => call(`/analytics/visitor/${encodeURIComponent(id)}`),
   analyticsVehicle: (regNo) => call(`/analytics/vehicle/${encodeURIComponent(regNo)}`),
+  conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+  conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
   liveActivity: ({ before = null, limit = 25 } = {}) =>
     call(`/live/activity?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}`),
 };
