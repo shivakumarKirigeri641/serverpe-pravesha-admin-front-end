@@ -4,7 +4,7 @@ import { Banner, Loading } from '../../components/ui.jsx';
 
 const GROUPS = [
   ['See', ['dashboard.view', 'live.view', 'analytics.view', 'reports.view', 'finance.view', 'conversations.view', 'conversations.technical', 'negative.view']],
-  ['Act', ['negative.act', 'visitors.block', 'tickets.free', 'tickets.onspot']],
+  ['Act', ['negative.act', 'visitors.block', 'tickets.free', 'tickets.onspot', 'finance.expenses']],
   ['Configure', ['settings.pricing', 'settings.slots', 'settings.staff', 'settings.users', 'settings.gst', 'audit.view']],
 ];
 

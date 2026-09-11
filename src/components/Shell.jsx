@@ -39,8 +39,7 @@ const NAV = [
   {
     group: 'Money',
     items: [
-      { to: '/revenue', label: 'Revenue', icon: RupeeIcon, soon: true },
-      { to: '/invoices', label: 'Invoices', icon: DocIcon, soon: true },
+      { to: '/finance', label: 'My GST & Invoices', icon: RupeeIcon, cap: 'finance.view' },
     ],
   },
   {

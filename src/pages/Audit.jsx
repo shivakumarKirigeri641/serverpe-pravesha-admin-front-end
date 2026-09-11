@@ -32,6 +32,10 @@ const ACTIONS = {
   free_ticket_issued: 'Issued a free pass',
   onspot_ticket_issued: 'Sold an on-spot pass',
   report_downloaded: 'Downloaded a report',
+  invoice_opened: 'Opened an invoice',
+  expense_recorded: 'Recorded an expense',
+  expense_removed: 'Removed an expense',
+  itc_setting_changed: 'Changed how ITC is counted',
   negative_reviewed: 'Reviewed negative activity',
   negative_dismissed: 'Dismissed negative activity',
   negative_escalated: 'Escalated negative activity',
@@ -41,8 +45,8 @@ const ACTIONS = {
 const actionLabel = (a) => ACTIONS[a] || String(a || '').replace(/_/g, ' ');
 
 const TONE = (a) => (/deleted|blocked|access_changed|reset/.test(a) ? 'bg-watch-50 text-watch-700'
-  : /pricing|gst/.test(a) ? 'bg-wrong-50 text-wrong-700'
-    : /sign_in|sign_out|downloaded|view_/.test(a) ? 'bg-shell text-muted' : 'bg-brand/10 text-brand');
+  : /pricing|gst|itc|expense_removed/.test(a) ? 'bg-wrong-50 text-wrong-700'
+    : /sign_in|sign_out|downloaded|view_|opened/.test(a) ? 'bg-shell text-muted' : 'bg-brand/10 text-brand');
 
 export default function Audit() {
   const [filters, setFilters] = useState({ q: '', action: '', adminId: '', from: '', to: '' });

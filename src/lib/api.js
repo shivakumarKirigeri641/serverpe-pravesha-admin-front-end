@@ -76,7 +76,7 @@ async function file(path) {
   if (res.status === 401) { signedOut(); throw new ApiError('Your session has ended. Please sign in again.', { code: 'signed_out', status: 401 }); }
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new ApiError(data.message || 'The report could not be generated.', { status: res.status });
+    throw new ApiError(data.message || 'The file could not be generated.', { status: res.status });
   }
   const disposition = res.headers.get('Content-Disposition') || '';
   const filename = (/filename="([^"]+)"/.exec(disposition) || [])[1] || 'report';
@@ -129,6 +129,14 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  /* My GST & Invoices. */
+  financeSummary: (params) => call(`/finance/summary?${new URLSearchParams(params)}`),
+  financeInvoices: (params) => call(`/finance/invoices?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  invoiceFile: (id) => file(`/finance/invoices/${id}/pdf`),
+  expenses: (params) => call(`/finance/expenses?${new URLSearchParams(params)}`),
+  addExpense: (body) => call('/finance/expenses', { method: 'POST', body }),
+  removeExpense: (id, reason) => call(`/finance/expenses/${id}`, { method: 'DELETE', body: { reason } }),
+  setGatewayItc: (include, reason) => call('/finance/itc-gateway', { method: 'PUT', body: { include, reason } }),
   /* Settings. Every change carries a reason; the server refuses one without. */
   pricing: (placeId) => call(`/settings/pricing${placeId ? `?placeId=${placeId}` : ''}`),
   updatePricing: (body) => call('/settings/pricing', { method: 'PUT', body }),
