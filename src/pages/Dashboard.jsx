@@ -54,6 +54,19 @@ export default function Dashboard() {
   }, [load]);
 
   const day = data?.date;
+  /* The server's today, in IST — not the browser's, which may be a day out in
+     another time zone and would let somebody pick a date the API refuses. */
+  const today = data?.today;
+
+  /*
+   * NOTHING BEYOND TODAY. A future date has bookings and nothing else: no
+   * arrivals, no gate activity, no money collected. Every figure but one would
+   * read zero, which looks like a disaster rather than a day that has not
+   * happened. So the picker stops at today, the forward arrow is disabled there,
+   * and the API refuses a future date regardless of what the screen does.
+   */
+  const goTo = (target) => setDate(!target || (today && target > today) ? null : target);
+  const atToday = !day || !today || day >= today;
 
   return (
     <Shell
@@ -64,11 +77,12 @@ export default function Dashboard() {
       actions={
         <div className="hidden items-center gap-1.5 md:flex">
           <button type="button" className="btn-quiet !px-2.5 !py-1.5" aria-label="Previous day"
-            onClick={() => setDate(shiftDay(day || new Date().toISOString().slice(0, 10), -1))}>‹</button>
-          <input type="date" className="input !w-auto !py-1.5 text-[13px]" value={day || ''}
-            onChange={(e) => setDate(e.target.value || null)} />
+            onClick={() => goTo(shiftDay(day || today, -1))}>‹</button>
+          <input type="date" className="input !w-auto !py-1.5 text-[13px]" value={day || ''} max={today || undefined}
+            onChange={(e) => goTo(e.target.value || null)} />
           <button type="button" className="btn-quiet !px-2.5 !py-1.5" aria-label="Next day"
-            onClick={() => setDate(shiftDay(day || new Date().toISOString().slice(0, 10), 1))}>›</button>
+            disabled={atToday} title={atToday ? 'Today is the latest day there is anything to report' : undefined}
+            onClick={() => goTo(shiftDay(day, 1))}>›</button>
           {data && !data.isToday && (
             <button type="button" className="btn-quiet !py-1.5 text-2xs" onClick={() => setDate(null)}>Today</button>
           )}
