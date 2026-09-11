@@ -11,6 +11,8 @@ import Finance from './pages/Finance.jsx';
 import Payments from './pages/Payments.jsx';
 import Tickets from './pages/Tickets.jsx';
 import Notifications from './pages/Notifications.jsx';
+import Destinations from './pages/Destinations.jsx';
+import Checkposts from './pages/Checkposts.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession, can } from './lib/session';
 
@@ -51,6 +53,9 @@ export default function App() {
       {can(me, 'tickets.view') && <Route path="/tickets" element={<Tickets />} />}
       {can(me, 'tickets.view') && <Route path="/tickets/:id" element={<Tickets />} />}
       {can(me, 'alerts.view') && <Route path="/notifications" element={<Notifications />} />}
+      {can(me, 'destinations.view') && <Route path="/destinations" element={<Destinations />} />}
+      {can(me, 'destinations.view') && <Route path="/destinations/:id" element={<Destinations />} />}
+      {can(me, 'destinations.view') && <Route path="/checkposts" element={<Checkposts />} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

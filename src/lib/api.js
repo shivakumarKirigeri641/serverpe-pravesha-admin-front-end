@@ -129,6 +129,18 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  /* Destinations and checkposts. */
+  destinations: () => call('/destinations'),
+  destination: (id) => call(`/destinations/${id}`),
+  destinationImages: () => call('/destinations/images'),
+  addDestination: (body) => call('/destinations', { method: 'POST', body }),
+  updateDestination: (id, body) => call(`/destinations/${id}`, { method: 'PUT', body }),
+  setDestinationActive: (id, active, reason) => call(`/destinations/${id}/active`, { method: 'POST', body: { active, reason } }),
+  checkposts: () => call('/checkposts'),
+  checkpost: (id) => call(`/checkposts/${id}`),
+  addCheckpost: (body) => call('/checkposts', { method: 'POST', body }),
+  updateCheckpost: (id, body) => call(`/checkposts/${id}`, { method: 'PUT', body }),
+  setCheckpostActive: (id, active, reason) => call(`/checkposts/${id}/active`, { method: 'POST', body: { active, reason } }),
   /* Notifications. */
   alerts: () => call('/alerts'),
   ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),
