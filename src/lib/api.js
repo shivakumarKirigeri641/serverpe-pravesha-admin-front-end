@@ -75,4 +75,8 @@ export const api = {
   /* Polled every few seconds by the live screen, so it fails fast rather than
      leaving a watcher staring at a frozen page. */
   live: () => call('/live', { timeoutMs: 12000 }),
+  /* Older pages of the gate feed. `before` is the cursor the previous page
+     returned — a time and an id, not an offset. */
+  liveActivity: ({ before = null, limit = 25 } = {}) =>
+    call(`/live/activity?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}`),
 };

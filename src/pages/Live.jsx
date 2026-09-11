@@ -34,11 +34,22 @@ export default function Live() {
   const [fresh, setFresh] = useState(() => new Set());
   const seen = useRef(new Set());
 
+  /*
+   * The feed pages backwards through the day. Page one is live and keeps
+   * refreshing; any page after it is a fixed window into the past, and polling
+   * must not shuffle rows under somebody's finger — so while paged back, the
+   * counters keep updating and the table does not.
+   */
+  const [feed, setFeed] = useState(null);      // null = page one, follow the live payload
+  const [pageNo, setPageNo] = useState(1);
+  const [paging, setPaging] = useState(false);
+  const trail = useRef([]);                    // cursors, so Back can retrace
+
   const load = useCallback(async () => {
     try {
       const d = await api.live();
       /* Which activity rows are new since the last answer. */
-      const incoming = new Set(d.activity.map((a) => a.id));
+      const incoming = new Set(d.activity.rows.map((a) => a.id));
       const isFirst = seen.current.size === 0;
       const added = isFirst ? new Set() : new Set([...incoming].filter((id) => !seen.current.has(id)));
       seen.current = incoming;
@@ -51,6 +62,40 @@ export default function Live() {
     }
   }, []);
 
+  const older = useCallback(async () => {
+    const cursor = feed ? feed.nextCursor : data?.activity?.nextCursor;
+    if (!cursor) return;
+    setPaging(true);
+    try {
+      const page = await api.liveActivity({ before: cursor });
+      trail.current.push(cursor);
+      setFeed(page);
+      setPageNo((p) => p + 1);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setPaging(false);
+    }
+  }, [feed, data]);
+
+  const newer = useCallback(async () => {
+    /* One step back is the cursor before the one that produced this page. */
+    trail.current.pop();
+    const previous = trail.current[trail.current.length - 1] || null;
+    if (!previous) { setFeed(null); setPageNo(1); return; }
+    setPaging(true);
+    try {
+      setFeed(await api.liveActivity({ before: previous }));
+      setPageNo((p) => Math.max(1, p - 1));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setPaging(false);
+    }
+  }, []);
+
+  const backToLive = useCallback(() => { trail.current = []; setFeed(null); setPageNo(1); }, []);
+
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     const id = setInterval(() => { if (document.visibilityState === 'visible') load(); }, POLL_MS);
@@ -60,6 +105,9 @@ export default function Live() {
   }, [load]);
 
   const v = data?.visitors;
+  const onLive = feed === null;
+  const rows = onLive ? (data?.activity.rows || []) : feed.rows;
+  const hasOlder = onLive ? Boolean(data?.activity.hasMore) : feed.hasMore;
 
   return (
     <Shell
@@ -217,7 +265,10 @@ export default function Live() {
 
           {/* E + H. The feed */}
           <section>
-            <SectionTitle label="Live checkpost activity" hint="Every check, newest first" />
+            <SectionTitle
+              label="Live checkpost activity"
+              hint={`${number(data.activity.counts.today)} checks today · ${number(data.activity.counts.total)} in all · newest first`}
+            />
             <div className="card overflow-x-auto">
               <table className="w-full min-w-[760px]">
                 <thead className="border-b border-line bg-shell">
@@ -228,11 +279,11 @@ export default function Live() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {data.activity.length === 0 && (
-                    <tr><td className="td text-center text-muted" colSpan={8}>No checks yet today.</td></tr>
+                  {rows.length === 0 && (
+                    <tr><td className="td text-center text-muted" colSpan={8}>No checks recorded.</td></tr>
                   )}
-                  {data.activity.map((a) => (
-                    <tr key={a.id} className={fresh.has(a.id) ? 'animate-[pulse_1.2s_ease-in-out_2] bg-good-50/60' : undefined}>
+                  {rows.map((a) => (
+                    <tr key={a.id} className={onLive && fresh.has(a.id) ? 'animate-[pulse_1.2s_ease-in-out_2] bg-good-50/60' : undefined}>
                       <td className="td tabular whitespace-nowrap text-muted">{clock(a.at)}</td>
                       <td className="td text-body">{a.staff || '—'}</td>
                       <td className="td text-muted">
@@ -247,6 +298,25 @@ export default function Live() {
                   ))}
                 </tbody>
               </table>
+
+              <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
+                <span className="text-2xs text-muted">
+                  {onLive
+                    ? `Newest ${number(rows.length)} checks · updating live`
+                    : `Page ${pageNo} · paused while you look back`}
+                </span>
+                <div className="flex items-center gap-2">
+                  {!onLive && (
+                    <button type="button" className="btn-quiet !px-3 !py-1.5 text-2xs" onClick={backToLive} disabled={paging}>
+                      Back to live
+                    </button>
+                  )}
+                  <button type="button" className="btn-quiet !px-3 !py-1.5 text-2xs"
+                    onClick={newer} disabled={paging || onLive}>‹ Newer</button>
+                  <button type="button" className="btn-quiet !px-3 !py-1.5 text-2xs"
+                    onClick={older} disabled={paging || !hasOlder}>Older ›</button>
+                </div>
+              </div>
             </div>
           </section>
         </div>
