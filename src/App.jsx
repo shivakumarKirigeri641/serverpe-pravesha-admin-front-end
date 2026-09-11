@@ -8,6 +8,7 @@ import Negative from './pages/Negative.jsx';
 import Settings from './pages/Settings.jsx';
 import Audit from './pages/Audit.jsx';
 import Finance from './pages/Finance.jsx';
+import Payments from './pages/Payments.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession, can } from './lib/session';
 
@@ -44,6 +45,7 @@ export default function App() {
       <Route path="/settings/:tab" element={<Settings />} />
       {can(me, 'audit.view') && <Route path="/audit" element={<Audit />} />}
       {can(me, 'finance.view') && <Route path="/finance" element={<Finance />} />}
+      {can(me, 'finance.view') && <Route path="/payments" element={<Payments />} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

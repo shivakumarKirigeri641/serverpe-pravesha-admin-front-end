@@ -39,6 +39,7 @@ const NAV = [
   {
     group: 'Money',
     items: [
+      { to: '/payments', label: 'Payments & Settlements', icon: SplitIcon, cap: 'finance.view' },
       { to: '/finance', label: 'My GST & Invoices', icon: RupeeIcon, cap: 'finance.view' },
     ],
   },
@@ -152,6 +153,7 @@ function PulseIcon(p) { return <Svg {...p}><path d="M3 12h4l3-8 4 16 3-8h4" /></
 function TicketIcon(p) { return <Svg {...p}><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6Z" /><path d="M13 5v14" strokeDasharray="2 3" /></Svg>; }
 function SlidersIcon(p) { return <Svg {...p}><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="8" cy="18" r="2" /></Svg>; }
 function UsersIcon(p) { return <Svg {...p}><circle cx="9" cy="8" r="3.2" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" /><path d="M16 5.5a3 3 0 0 1 0 5.8M17.5 19a5 5 0 0 0-2-4" /></Svg>; }
+function SplitIcon(p) { return <Svg {...p}><path d="M5 4v6a3 3 0 0 0 3 3h8" /><path d="M13 10l3 3-3 3" /><path d="M5 13v7" /></Svg>; }
 function RupeeIcon(p) { return <Svg {...p}><path d="M7 5h10M7 9h10M15.5 5c0 4-3 6-8.5 6l8 8" /></Svg>; }
 function DocIcon(p) { return <Svg {...p}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></Svg>; }
 function CogIcon(p) { return <Svg {...p}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></Svg>; }

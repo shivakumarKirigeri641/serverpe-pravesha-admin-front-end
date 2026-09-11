@@ -129,6 +129,13 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  /* Payments & Settlements. */
+  paymentsOverview: (params) => call(`/payments/overview?${new URLSearchParams(params)}`),
+  paymentsList: (params) => call(`/payments/list?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  payment: (id) => call(`/payments/${id}`),
+  remittances: () => call('/payments/remittances'),
+  remittanceDue: (from, to) => call(`/payments/remittances/due?from=${from}&to=${to}`),
+  addRemittance: (body) => call('/payments/remittances', { method: 'POST', body }),
   /* My GST & Invoices. */
   financeSummary: (params) => call(`/finance/summary?${new URLSearchParams(params)}`),
   financeInvoices: (params) => call(`/finance/invoices?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),

@@ -34,6 +34,7 @@ const ACTIONS = {
   report_downloaded: 'Downloaded a report',
   invoice_opened: 'Opened an invoice',
   expense_recorded: 'Recorded an expense',
+  remittance_recorded: 'Recorded a remittance to the Department',
   expense_removed: 'Removed an expense',
   itc_setting_changed: 'Changed how ITC is counted',
   negative_reviewed: 'Reviewed negative activity',
