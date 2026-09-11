@@ -129,6 +129,12 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  /* Ticket Management. */
+  ticketSearch: (params) => call(`/tickets/search?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  ticket: (id) => call(`/tickets/${encodeURIComponent(id)}/detail`),
+  passFile: (id) => file(`/tickets/${id}/pass.pdf`),
+  cancelTicket: (id, reason) => call(`/tickets/${id}/cancel`, { method: 'POST', body: { reason } }),
+  resendTicket: (id, reason) => call(`/tickets/${id}/resend`, { method: 'POST', body: { reason } }),
   /* Payments & Settlements. */
   paymentsOverview: (params) => call(`/payments/overview?${new URLSearchParams(params)}`),
   paymentsList: (params) => call(`/payments/list?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),

@@ -31,7 +31,7 @@ const NAV = [
     items: [
       { to: '/conversations', label: 'Conversations', icon: ChatIcon, cap: 'conversations.view' },
       { to: '/settings/passes', label: 'Free & on-spot passes', icon: TicketIcon, cap: ['tickets.free', 'tickets.onspot'] },
-      { to: '/bookings', label: 'Bookings', icon: TicketIcon, soon: true },
+      { to: '/tickets', label: 'Ticket management', icon: TicketIcon, cap: 'tickets.view', match: (path) => path.startsWith('/tickets') },
       { to: '/capacity', label: 'Capacity & closures', icon: SlidersIcon, soon: true },
       { to: '/settings/staff', label: 'Checkpost staff', icon: UsersIcon, cap: 'settings.staff' },
     ],
