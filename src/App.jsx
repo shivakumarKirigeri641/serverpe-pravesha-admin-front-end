@@ -10,6 +10,7 @@ import Audit from './pages/Audit.jsx';
 import Finance from './pages/Finance.jsx';
 import Payments from './pages/Payments.jsx';
 import Tickets from './pages/Tickets.jsx';
+import Notifications from './pages/Notifications.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession, can } from './lib/session';
 
@@ -49,6 +50,7 @@ export default function App() {
       {can(me, 'finance.view') && <Route path="/payments" element={<Payments />} />}
       {can(me, 'tickets.view') && <Route path="/tickets" element={<Tickets />} />}
       {can(me, 'tickets.view') && <Route path="/tickets/:id" element={<Tickets />} />}
+      {can(me, 'alerts.view') && <Route path="/notifications" element={<Notifications />} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

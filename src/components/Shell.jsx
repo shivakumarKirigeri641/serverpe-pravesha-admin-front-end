@@ -32,7 +32,7 @@ const NAV = [
       { to: '/conversations', label: 'Conversations', icon: ChatIcon, cap: 'conversations.view' },
       { to: '/settings/passes', label: 'Free & on-spot passes', icon: TicketIcon, cap: ['tickets.free', 'tickets.onspot'] },
       { to: '/tickets', label: 'Ticket management', icon: TicketIcon, cap: 'tickets.view', match: (path) => path.startsWith('/tickets') },
-      { to: '/capacity', label: 'Capacity & closures', icon: SlidersIcon, soon: true },
+      { to: '/notifications', label: 'Notifications', icon: BellIcon, cap: 'alerts.view' },
       { to: '/settings/staff', label: 'Checkpost staff', icon: UsersIcon, cap: 'settings.staff' },
     ],
   },
@@ -151,6 +151,7 @@ function ChatIcon(p) { return <Svg {...p}><path d="M21 12a8 8 0 0 1-11.6 7.1L4 2
 function ChartIcon(p) { return <Svg {...p}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></Svg>; }
 function PulseIcon(p) { return <Svg {...p}><path d="M3 12h4l3-8 4 16 3-8h4" /></Svg>; }
 function TicketIcon(p) { return <Svg {...p}><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6Z" /><path d="M13 5v14" strokeDasharray="2 3" /></Svg>; }
+function BellIcon(p) { return <Svg {...p}><path d="M18 16V11a6 6 0 1 0-12 0v5l-1.5 3h15Z" /><path d="M10 21a2 2 0 0 0 4 0" /></Svg>; }
 function SlidersIcon(p) { return <Svg {...p}><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="8" cy="18" r="2" /></Svg>; }
 function UsersIcon(p) { return <Svg {...p}><circle cx="9" cy="8" r="3.2" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" /><path d="M16 5.5a3 3 0 0 1 0 5.8M17.5 19a5 5 0 0 0-2-4" /></Svg>; }
 function SplitIcon(p) { return <Svg {...p}><path d="M5 4v6a3 3 0 0 0 3 3h8" /><path d="M13 10l3 3-3 3" /><path d="M5 13v7" /></Svg>; }

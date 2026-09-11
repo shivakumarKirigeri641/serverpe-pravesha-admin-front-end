@@ -129,6 +129,14 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  /* Notifications. */
+  alerts: () => call('/alerts'),
+  ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),
+  unackAlert: (key) => call('/alerts/unack', { method: 'POST', body: { key } }),
+  announcements: () => call('/alerts/announcements'),
+  announcementAffected: (params) => call(`/alerts/announcements/affected?${new URLSearchParams(Object.entries(params).filter(([, v]) => v))}`),
+  publishAnnouncement: (body) => call('/alerts/announcements', { method: 'POST', body }),
+  endAnnouncement: (id, reason) => call(`/alerts/announcements/${id}/end`, { method: 'POST', body: { reason } }),
   /* Ticket Management. */
   ticketSearch: (params) => call(`/tickets/search?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   ticket: (id) => call(`/tickets/${encodeURIComponent(id)}/detail`),
