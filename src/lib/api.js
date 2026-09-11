@@ -60,6 +60,29 @@ async function call(path, { method = 'GET', body, auth = true, timeoutMs = 20000
   return data;
 }
 
+/**
+ * A file from the API, fetched with the session token rather than opened as a
+ * plain link — a link cannot carry the Authorization header, and putting the
+ * token in a URL would leave it in browser history and server logs.
+ */
+async function file(path) {
+  const token = getToken();
+  let res;
+  try {
+    res = await fetch(`${P}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new ApiError('Cannot reach the server.', { code: 'offline' });
+  }
+  if (res.status === 401) { signedOut(); throw new ApiError('Your session has ended. Please sign in again.', { code: 'signed_out', status: 401 }); }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new ApiError(data.message || 'The report could not be generated.', { status: res.status });
+  }
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const filename = (/filename="([^"]+)"/.exec(disposition) || [])[1] || 'report';
+  return { blob: await res.blob(), filename, reportNo: res.headers.get('X-Report-No') };
+}
+
 export const api = {
   signIn: (mobile, password) =>
     call('/session', { method: 'POST', auth: false, body: { mobile, password } })
@@ -87,6 +110,9 @@ export const api = {
   },
   analyticsVisitor: (id) => call(`/analytics/visitor/${encodeURIComponent(id)}`),
   analyticsVehicle: (regNo) => call(`/analytics/vehicle/${encodeURIComponent(regNo)}`),
+  report: (params) => call(`/reports?${new URLSearchParams(params)}`),
+  reportFile: (params, format) => file(`/reports/download?${new URLSearchParams({ ...params, format })}`),
+  reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
   liveActivity: ({ before = null, limit = 25 } = {}) =>

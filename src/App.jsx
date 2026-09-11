@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Live from './pages/Live.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Conversations from './pages/Conversations.jsx';
+import Reports from './pages/Reports.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession } from './lib/session';
 
@@ -33,6 +34,7 @@ export default function App() {
       <Route path="/live" element={<Live />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/conversations" element={<Conversations />} />
+      <Route path="/reports" element={<Reports />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
