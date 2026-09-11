@@ -4,6 +4,7 @@ import Live from './pages/Live.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Conversations from './pages/Conversations.jsx';
 import Reports from './pages/Reports.jsx';
+import Negative from './pages/Negative.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession } from './lib/session';
 
@@ -35,6 +36,7 @@ export default function App() {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/conversations" element={<Conversations />} />
       <Route path="/reports" element={<Reports />} />
+      <Route path="/negative" element={<Negative />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -110,6 +110,20 @@ export const api = {
   },
   analyticsVisitor: (id) => call(`/analytics/visitor/${encodeURIComponent(id)}`),
   analyticsVehicle: (regNo) => call(`/analytics/vehicle/${encodeURIComponent(regNo)}`),
+  negative: () => call('/negative'),
+  negativeEvents: ({ category, q, from, to, before, limit = 25 } = {}) => {
+    const qs = new URLSearchParams({ limit: String(limit) });
+    if (category) qs.set('category', category);
+    if (q) qs.set('q', q);
+    if (from) qs.set('from', from);
+    if (to) qs.set('to', to);
+    if (before) qs.set('before', before);
+    return call(`/negative/events?${qs}`);
+  },
+  negativeVehicle: (regNo) => call(`/negative/vehicle/${encodeURIComponent(regNo)}`),
+  negativeVisitor: (id) => call(`/negative/visitor/${encodeURIComponent(id)}`),
+  negativeReview: (body) => call('/negative/review', { method: 'POST', body }),
+  negativeBlock: (id, body) => call(`/negative/visitor/${encodeURIComponent(id)}/block`, { method: 'POST', body }),
   report: (params) => call(`/reports?${new URLSearchParams(params)}`),
   reportFile: (params, format) => file(`/reports/download?${new URLSearchParams({ ...params, format })}`),
   reportHistory: () => call('/reports/history'),
