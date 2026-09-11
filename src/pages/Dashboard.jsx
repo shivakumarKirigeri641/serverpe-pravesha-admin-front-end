@@ -103,18 +103,15 @@ export default function Dashboard() {
             <Tile label="Total booked" stat={data.bookings.total} good="up" />
             <Tile label="Advance" stat={data.bookings.advance} good="up" hint="Bought on an earlier day" />
             <Tile label="Same day" stat={data.bookings.sameDay} good="up" hint="Bought on the day of travel" />
-            <Tile label="Cancelled" stat={data.bookings.cancelled} good="down" />
-            <Tile label="Expired" stat={data.bookings.expired} good="down" hint="Holds never paid for" />
-            <Tile label="Rescheduled" stat={data.bookings.rescheduled} note="Rescheduling is not offered yet" />
+            <Tile label="Abandoned at payment" stat={data.bookings.unpaidHolds} good="down"
+              hint="Place held, payment never completed" />
           </Group>
 
           <Group title="Visitor status" hint="Where today's passes stand right now">
             <Tile label="Booked" stat={data.visitors.booked} good="up" />
-            <Tile label="Arrived" stat={data.visitors.arrived} good="up" hint="Presented at a gate" />
-            <Tile label="Entered" stat={data.visitors.entered} good="up" hint="Recorded as entering" />
+            <Tile label="Entered" stat={data.visitors.entered} good="up" hint="Recorded at a gate" />
             <Tile label="Yet to arrive" stat={data.visitors.yetToArrive} good="neutral" hint="Slot still open" />
             <Tile label="Skipped" stat={data.visitors.skipped} good="down" hint="No-show: slot has closed" />
-            <Tile label="Cancelled" stat={data.visitors.cancelled} good="down" />
           </Group>
 
           <Group title="Verification at the gate" hint="What staff checks returned">
@@ -124,8 +121,10 @@ export default function Dashboard() {
             <Tile label="Invalid" stat={data.verification.invalid} good="down" hint="Wrong day, wrong gate, unpaid, unknown" />
             <Tile label="Repeat attempt" stat={data.verification.repeatAttempt} good="down" hint="Refused, then tried again" />
             <Tile label="Suspicious" stat={data.verification.suspicious} good="down" hint="Duplicates plus repeat attempts" />
-            <Tile label="Outside slot" stat={data.verification.outsideSlot} good="down" />
-            <Tile label="Allowed late" stat={data.verification.allowedLate} good="down" hint="Staff admitted anyway" />
+            <Tile label="Outside slot" stat={data.verification.outsideSlot} good="down"
+              hint="Arrived before or after their slot" />
+            <Tile label="Admitted anyway" stat={data.verification.allowedLate} good="down"
+              hint="Outside the slot, but staff allowed it" />
             <Tile label="Vehicle mismatch" stat={data.verification.vehicleMismatch}
               note="Staff look a vehicle up by its own number, so there is nothing to mismatch" />
           </Group>

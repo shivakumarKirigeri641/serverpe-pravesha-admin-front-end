@@ -137,8 +137,8 @@ export default function Live() {
             <SectionTitle label="Visitors today" hint="Against yesterday at this hour" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
               <Counter label="Booked" stat={v.booked} good="up" />
-              <Counter label="Arrived" stat={v.arrived} good="up" hint="Presented at a gate" />
-              <Counter label="Entered" stat={v.entered} good="up" hint="Entry recorded" />
+              <Counter label="Entered" stat={v.entered} good="up" hint="Entry recorded at a gate" />
+              <Counter label="Checked at gate" stat={v.checkedAtGate} good="up" hint="Passes looked up, however they ended" />
               <Counter label="Yet to arrive" stat={v.yetToArrive} hint="Slot still open" />
               <Counter label="Skipped" stat={v.skipped} good="down" hint="Slot closed, never came" />
               <Counter label="Inside now" stat={v.inside} hint="Estimated — no exit is recorded" estimated />
@@ -334,7 +334,7 @@ const VEHICLE_ICON = { BIKE: '🏍️', CAR: '🚗', TOOFAN: '🚙', TT: '🚐' 
 
 const VERDICTS = {
   valid: ['Valid entry', 'bg-good-50 text-good-700'],
-  valid_override: ['Allowed late', 'bg-watch-50 text-watch-700'],
+  valid_override: ['Admitted anyway', 'bg-watch-50 text-watch-700'],
   already_used: ['Already used', 'bg-wrong-50 text-wrong-700'],
   wrong_day: ['Wrong date', 'bg-wrong-50 text-wrong-700'],
   wrong_place: ['Wrong gate', 'bg-wrong-50 text-wrong-700'],
@@ -431,7 +431,7 @@ function Performance({ performance: p, verdicts }) {
     ['Invalid pass', verdicts.invalid, 'text-wrong-700'],
     ['Repeat attempt', verdicts.repeatAttempt, 'text-wrong-700'],
     ['Outside slot', verdicts.outsideSlot, 'text-watch-700'],
-    ['Allowed late', verdicts.allowedLate, 'text-watch-700'],
+    ['Admitted anyway', verdicts.allowedLate, 'text-watch-700'],
     ['Cancelled', verdicts.cancelled, 'text-wrong-700'],
     ['Vehicle mismatch', verdicts.vehicleMismatch, 'text-line'],
   ];
