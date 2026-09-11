@@ -57,6 +57,7 @@ const NAV = [
         /* Staff and passes have their own entries above; everything else under /settings is here. */
         match: (path) => path.startsWith('/settings') && !/^\/settings\/(staff|passes)/.test(path) },
       { to: '/audit', label: 'Audit trail', icon: ShieldIcon, cap: 'audit.view' },
+      { to: '/health', label: 'System health', icon: HeartIcon, cap: 'health.view' },
     ],
   },
 ];
@@ -167,4 +168,5 @@ function DocIcon(p) { return <Svg {...p}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0
 function PinIcon(p) { return <Svg {...p}><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></Svg>; }
 function GateIcon(p) { return <Svg {...p}><path d="M3 20V9l9-4 9 4v11" /><path d="M3 20h18M9 20v-6h6v6" /></Svg>; }
 function CogIcon(p) { return <Svg {...p}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></Svg>; }
+function HeartIcon(p) { return <Svg {...p}><path d="M3 12h4l2-4 3 8 2-4h7" /><path d="M20.5 8.5a4.6 4.6 0 0 0-8.5-2 4.6 4.6 0 0 0-8.5 2" strokeOpacity=".45" /></Svg>; }
 function ShieldIcon(p) { return <Svg {...p}><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6Z" /><path d="m9 12 2 2 4-4" /></Svg>; }

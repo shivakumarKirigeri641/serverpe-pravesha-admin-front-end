@@ -13,6 +13,7 @@ import Tickets from './pages/Tickets.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Destinations from './pages/Destinations.jsx';
 import Checkposts from './pages/Checkposts.jsx';
+import Health from './pages/Health.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession, can } from './lib/session';
 
@@ -56,6 +57,7 @@ export default function App() {
       {can(me, 'destinations.view') && <Route path="/destinations" element={<Destinations />} />}
       {can(me, 'destinations.view') && <Route path="/destinations/:id" element={<Destinations />} />}
       {can(me, 'destinations.view') && <Route path="/checkposts" element={<Checkposts />} />}
+      {can(me, 'health.view') && <Route path="/health" element={<Health />} />}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

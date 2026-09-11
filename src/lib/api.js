@@ -129,6 +129,7 @@ export const api = {
   reportHistory: () => call('/reports/history'),
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
+  health: () => call('/health'),
   /* Destinations and checkposts. */
   destinations: () => call('/destinations'),
   destination: (id) => call(`/destinations/${id}`),
