@@ -1,91 +1,75 @@
 /**
- * The single door to the back-end.
+ * api.js — every call the admin panel makes.
  *
- * Every request carries the bearer token; every 401 clears the session and
- * bounces to the login screen, so an expired session can never leave the panel
- * showing data it is no longer entitled to display.
+ * The token is the session: stored so a reload does not sign somebody out
+ * mid-task, sent on every request, and cleared the moment the back-end says the
+ * session has ended — once, centrally, so no screen has to handle it.
  *
- * The token lives in sessionStorage rather than localStorage: closing the tab
- * ends the session. This panel shows citizens' mobile numbers, vehicle numbers
- * and a government department's revenue — it should not survive a closed
- * browser on a shared office machine.
+ * Grows one function at a time, beside the screen that uses it.
  */
 
-const KEY = 'serverpe.entry.admin.token';
+const BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
+const P = `${BASE}/admin/api`;
+const KEY = 'pravesha.admin.token';
 
-// Empty in development, where Vite proxies /admin/api to port 7777. Set at
-// build time for production, where the panel and the API are different hosts.
-export const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
+export const getToken = () => { try { return localStorage.getItem(KEY) || null; } catch { return null; } };
+export const setToken = (t) => { try { t ? localStorage.setItem(KEY, t) : localStorage.removeItem(KEY); } catch { /* private mode */ } };
 
-export const getToken = () => sessionStorage.getItem(KEY);
-export const setToken = (t) => sessionStorage.setItem(KEY, t);
-export const clearToken = () => sessionStorage.removeItem(KEY);
+const listeners = new Set();
+export const onSignedOut = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+const signedOut = () => { setToken(null); listeners.forEach((fn) => fn()); };
 
-let onUnauthorized = () => {};
-export const setUnauthorizedHandler = (fn) => { onUnauthorized = fn; };
+export class ApiError extends Error {
+  constructor(message, { code = 'error', status = 0, body = null } = {}) {
+    super(message);
+    this.code = code;
+    this.status = status;
+    this.body = body;
+    this.offline = code === 'offline';
+  }
+}
 
-let onToast = () => {};
-export const setToastHandler = (fn) => { onToast = fn; };
-
-async function request(path, { method = 'GET', body, signal, quiet = false } = {}) {
+async function call(path, { method = 'GET', body, auth = true, timeoutMs = 20000 } = {}) {
   const headers = { Accept: 'application/json' };
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
   if (body) headers['Content-Type'] = 'application/json';
+  const token = getToken();
+  if (auth && token) headers.Authorization = `Bearer ${token}`;
 
   let res;
   try {
-    res = await fetch(`${API_BASE}/admin/api${path}`, {
-      method, headers, signal, body: body ? JSON.stringify(body) : undefined,
+    res = await fetch(`${P}${path}`, {
+      method, headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(timeoutMs),
     });
-  } catch {
-    const msg = 'Cannot reach the server. Please check that the back-end is running.';
-    if (!quiet) onToast({ type: 'error', message: msg });
-    throw new Error(msg);
-  }
-
-  if (res.status === 401) {
-    clearToken();
-    onUnauthorized();
-    throw new Error('Your session has ended. Please sign in again.');
+  } catch (e) {
+    throw new ApiError(
+      e.name === 'TimeoutError' ? 'The server is taking too long to answer.' : 'Cannot reach the server.',
+      { code: 'offline' });
   }
 
   const data = await res.json().catch(() => ({}));
 
-  if (!res.ok || data.ok === false) {
-    const msg = data.message || data.error || `Request failed (${res.status})`;
-    if (!quiet) onToast({ type: 'error', message: msg });
-    const e = new Error(msg);
-    e.data = data;
-    throw e;
+  if (res.status === 401 && auth) {
+    signedOut();
+    throw new ApiError(data.message || 'Your session has ended. Please sign in again.', { code: 'signed_out', status: 401 });
   }
-
-  if (method !== 'GET' && !quiet) onToast({ type: 'ok', message: 'Saved.' });
+  if (!res.ok) {
+    throw new ApiError(data.message || 'Something went wrong.', { code: data.error || 'error', status: res.status, body: data });
+  }
   return data;
 }
 
 export const api = {
-  get: (p, o) => request(p, { ...o }),
-  post: (p, body, o) => request(p, { method: 'POST', body, ...o }),
-
-  /**
-   * A CSV download.
-   *
-   * Fetched with the token rather than opened as a plain link, because a link
-   * carries no Authorization header — the server would refuse it, and the
-   * officer would get a 401 page instead of their report.
-   */
-  async download(path, filename) {
-    const res = await fetch(`${API_BASE}/admin/api${path}`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
-    if (!res.ok) { onToast({ type: 'error', message: 'Could not prepare that report.' }); return; }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    onToast({ type: 'ok', message: 'Report downloaded.' });
-  },
+  signIn: (mobile, password) =>
+    call('/session', { method: 'POST', auth: false, body: { mobile, password } })
+      .catch((e) => {
+        /* A wrong password and a locked account are answers the screen shows,
+           not failures it has to apologise for. */
+        if (e.body && (e.code === 'bad_credentials' || e.code === 'locked')) return e.body;
+        throw e;
+      }),
+  session: () => call('/session'),
+  signOut: () => call('/session', { method: 'DELETE' }),
+  dashboard: (date) => call(`/dashboard${date ? `?date=${date}` : ''}`),
 };

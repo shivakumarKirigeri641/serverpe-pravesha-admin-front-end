@@ -3,28 +3,20 @@
 @tailwind utilities;
 
 @layer base {
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    @apply bg-paper text-ink-800 font-sans antialiased;
-  }
-  /* Figures in a column must line up, or a reader cannot compare them at a
-     glance — which is most of what this panel is for. */
-  .tnum { font-variant-numeric: tabular-nums; }
-  h1, h2, h3 { text-wrap: balance; }
-  :focus-visible { @apply outline-none ring-2 ring-forest-500 ring-offset-1 ring-offset-paper; }
+  body { @apply bg-shell text-body font-sans antialiased; }
+  h1, h2, h3 { @apply text-ink; }
+  /* Numbers in a table must line up; a dashboard read at a glance depends on it. */
+  .tabular { font-variant-numeric: tabular-nums; }
 }
 
 @layer components {
-  .card { @apply bg-paper-raised rounded-lg shadow-card border border-ink-300/40; }
-  .label { @apply text-2xs font-semibold uppercase tracking-wider text-ink-500; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-semibold transition; }
-  .btn-primary { @apply btn bg-forest-700 text-white hover:bg-forest-600 disabled:opacity-50; }
-  .btn-ghost { @apply btn border border-ink-300 bg-paper-raised text-ink-700 hover:bg-paper-sunken disabled:opacity-50; }
-  .btn-danger { @apply btn bg-refused text-white hover:brightness-110 disabled:opacity-50; }
-  .input { @apply w-full rounded-md border border-ink-300 bg-paper-raised px-3 py-2 text-sm
-                  placeholder:text-ink-400 focus:border-forest-600 focus:outline-none; }
-  .th { @apply px-3 py-2 text-left text-2xs font-semibold uppercase tracking-wider text-ink-500 whitespace-nowrap; }
-  .td { @apply px-3 py-2.5 text-sm text-ink-800 whitespace-nowrap; }
-  .row { @apply border-t border-ink-300/40 hover:bg-forest-50/60; }
-  .pill { @apply inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-semibold; }
+  .card { @apply rounded-xl border border-line bg-white shadow-card; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50; }
+  .btn-primary { @apply btn bg-brand text-white hover:bg-brand-light; }
+  .btn-quiet { @apply btn border border-line bg-white text-ink hover:bg-shell; }
+  .input { @apply w-full rounded-lg border border-line bg-white px-3.5 py-2.5 text-[15px] text-ink outline-none transition placeholder:text-muted/60 focus:border-brand-accent focus:ring-4 focus:ring-brand-accent/10; }
+  .label { @apply mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-muted; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold; }
+  .th { @apply px-4 py-2.5 text-left text-2xs font-semibold uppercase tracking-wider text-muted; }
+  .td { @apply px-4 py-3 text-sm; }
 }
