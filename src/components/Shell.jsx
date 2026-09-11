@@ -17,7 +17,7 @@ const NAV = [
     group: 'Watch',
     items: [
       { to: '/', label: 'Dashboard', icon: GridIcon, end: true },
-      { to: '/live', label: 'Live gate', icon: PulseIcon, soon: true },
+      { to: '/live', label: 'Live monitoring', icon: PulseIcon },
     ],
   },
   {

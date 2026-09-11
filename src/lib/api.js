@@ -72,4 +72,7 @@ export const api = {
   session: () => call('/session'),
   signOut: () => call('/session', { method: 'DELETE' }),
   dashboard: (date) => call(`/dashboard${date ? `?date=${date}` : ''}`),
+  /* Polled every few seconds by the live screen, so it fails fast rather than
+     leaving a watcher staring at a frozen page. */
+  live: () => call('/live', { timeoutMs: 12000 }),
 };
