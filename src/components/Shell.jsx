@@ -18,6 +18,7 @@ const NAV = [
     items: [
       { to: '/', label: 'Dashboard', icon: GridIcon, end: true },
       { to: '/live', label: 'Live monitoring', icon: PulseIcon },
+      { to: '/analytics', label: 'Data analytics', icon: ChartIcon },
     ],
   },
   {
@@ -132,6 +133,7 @@ const Svg = ({ className = 'h-4 w-4', children }) => (
 );
 
 function GridIcon(p) { return <Svg {...p}><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></Svg>; }
+function ChartIcon(p) { return <Svg {...p}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></Svg>; }
 function PulseIcon(p) { return <Svg {...p}><path d="M3 12h4l3-8 4 16 3-8h4" /></Svg>; }
 function TicketIcon(p) { return <Svg {...p}><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6Z" /><path d="M13 5v14" strokeDasharray="2 3" /></Svg>; }
 function SlidersIcon(p) { return <Svg {...p}><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="8" cy="18" r="2" /></Svg>; }

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard.jsx';
 import Live from './pages/Live.jsx';
+import Analytics from './pages/Analytics.jsx';
 import SignIn from './pages/SignIn.jsx';
 import { useSession } from './lib/session';
 
@@ -29,6 +30,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Dashboard />} />
       <Route path="/live" element={<Live />} />
+      <Route path="/analytics" element={<Analytics />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

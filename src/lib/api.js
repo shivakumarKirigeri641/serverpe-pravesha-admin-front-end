@@ -77,6 +77,16 @@ export const api = {
   live: () => call('/live', { timeoutMs: 12000 }),
   /* Older pages of the gate feed. `before` is the cursor the previous page
      returned — a time and an id, not an offset. */
+  analytics: ({ from, to }) => call(`/analytics?from=${from}&to=${to}`),
+  analyticsCompare: (params) => call(`/analytics/compare?${new URLSearchParams(params)}`),
+  analyticsVisitors: ({ q = null, band = null, limit = 25, offset = 0 } = {}) => {
+    const qs = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+    if (q) qs.set('q', q);
+    if (band) qs.set('band', band);
+    return call(`/analytics/visitors?${qs}`);
+  },
+  analyticsVisitor: (id) => call(`/analytics/visitor/${encodeURIComponent(id)}`),
+  analyticsVehicle: (regNo) => call(`/analytics/vehicle/${encodeURIComponent(regNo)}`),
   liveActivity: ({ before = null, limit = 25 } = {}) =>
     call(`/live/activity?limit=${limit}${before ? `&before=${encodeURIComponent(before)}` : ''}`),
 };
