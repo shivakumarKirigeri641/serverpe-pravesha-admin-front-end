@@ -231,6 +231,12 @@ function TicketDetail({ id, onBack }) {
               ['Entered at', data.entry.at ? when(data.entry.at) : '—'],
               ['Checkpost', data.entry.checkpost || '—'],
               ['Checked by', data.entry.staff || '—'],
+              /* An entry a staff member saw and one the visitor declared are
+                 different evidence, so the row says which this is rather than
+                 leaving both looking like "Entered". */
+              ...(data.entry.source === 'self'
+                ? [['Recorded by', `The visitor, from their phone${data.entry.metresFromGate != null ? ` · ${data.entry.metresFromGate} m from the gate` : ''}`]]
+                : data.entry.source === 'gate' ? [['Recorded by', 'A staff member at the barrier']] : []),
               ['Attempts at the gate', number(data.entry.attempts.length)],
             ]} />
             {data.grant ? (
