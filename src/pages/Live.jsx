@@ -267,7 +267,7 @@ export default function Live() {
           <section>
             <SectionTitle
               label="Live checkpost activity"
-              hint={`${number(data.activity.counts.today)} checks today · ${number(data.activity.counts.total)} in all · newest first`}
+              hint={`${number(data.activity.counts.today)} checks today · ${number(data.activity.counts.entered)} entered · ${number(data.activity.counts.refused)} refused · today only, newest first`}
             />
             <div className="card overflow-x-auto">
               <table className="w-full min-w-[760px]">

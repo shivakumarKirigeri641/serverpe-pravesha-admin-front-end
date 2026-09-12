@@ -52,6 +52,11 @@ export default function Health() {
                   <span className={`chip ${overall[1]}`}>{overall[3]} {overall[0]}</span>
                   <h2 className="text-base font-semibold text-ink">{data.overallLabel}</h2>
                 </div>
+                {data.quietServices?.length > 0 && (
+                  <p className="mt-1 text-2xs text-muted">
+                    Nothing recent to judge {data.quietServices.join(' or ').toLowerCase()} by.
+                  </p>
+                )}
                 <p className="mt-1 max-w-3xl text-2xs text-muted">{data.note}</p>
               </div>
               <div className="text-right">
