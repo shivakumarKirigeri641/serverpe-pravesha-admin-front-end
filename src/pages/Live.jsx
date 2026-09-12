@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import Rolling from '../components/Rolling.jsx';
 import { clock, number, percent, plate } from '../lib/format';
 
 /*
@@ -158,7 +159,7 @@ export default function Live() {
                     </span>
                     <Delta stat={veh} good="up" />
                   </div>
-                  <div className="mt-1.5 tabular text-3xl font-bold leading-none text-ink">{number(veh.value)}</div>
+                  <div className="mt-1.5 tabular text-3xl font-bold leading-none text-ink"><Rolling text={number(veh.value)} /></div>
                   <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-shell">
                     <div className="h-full rounded-full bg-brand-accent" style={{ width: `${veh.shareOfTraffic}%` }} />
                   </div>
@@ -404,7 +405,7 @@ function Counter({ label, stat, good, hint, estimated }) {
         <Delta stat={stat} good={good} />
       </div>
       <div className="mt-1.5 flex items-baseline gap-1.5">
-        <span className="tabular text-3xl font-bold leading-none text-ink">{number(stat.value)}</span>
+        <span className="tabular text-3xl font-bold leading-none text-ink"><Rolling text={number(stat.value)} /></span>
         {estimated && <span className="text-2xs font-semibold uppercase tracking-wider text-watch-700">est.</span>}
       </div>
       {hint && <div className="mt-2 text-2xs text-muted">{hint}</div>}
@@ -469,7 +470,7 @@ function Performance({ performance: p, verdicts }) {
 const Stat = ({ label, value, sub }) => (
   <div className="bg-white px-4 py-3">
     <div className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</div>
-    <div className="tabular mt-0.5 text-lg font-bold text-ink">{value}</div>
+    <div className="tabular mt-0.5 text-lg font-bold text-ink"><Rolling text={String(value)} /></div>
     {sub && <div className="text-2xs text-muted">{sub}</div>}
   </div>
 );

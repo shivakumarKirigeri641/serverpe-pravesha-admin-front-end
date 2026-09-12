@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend as RLegend } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import Rolling from '../components/Rolling.jsx';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate } from '../lib/format';
 import { Banner, Field, Loading, Modal, useAction, when } from '../components/ui.jsx';
@@ -128,7 +129,7 @@ function Counts({ data }) {
         {cards.map(([label, v, tone]) => (
           <div key={label} className="card p-4">
             <div className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</div>
-            <div className={`tabular mt-1.5 text-2xl font-bold leading-none ${v.count ? tone : 'text-ink'}`}>{number(v.count)}</div>
+            <div className={`tabular mt-1.5 text-2xl font-bold leading-none ${v.count ? tone : 'text-ink'}`}><Rolling text={number(v.count)} /></div>
             <div className="mt-2 text-2xs text-muted">{inr0(v.amount)}</div>
           </div>
         ))}
@@ -189,7 +190,7 @@ function Split({ data }) {
           <div>
             <div className="rounded-xl border border-line p-4">
               <div className="text-2xs font-semibold uppercase tracking-wider text-muted">Visitors paid</div>
-              <div className="tabular text-3xl font-bold text-ink">{inr(s.visitorPaid)}</div>
+              <div className="tabular text-3xl font-bold text-ink"><Rolling text={inr(s.visitorPaid)} /></div>
               {s.refunded > 0 && <div className="mt-1 text-2xs text-wrong-700">{inr(s.refunded)} refunded</div>}
             </div>
             <div className="my-2 pl-6 text-muted">↓</div>

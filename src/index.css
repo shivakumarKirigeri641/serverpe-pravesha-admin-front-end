@@ -10,6 +10,16 @@
 }
 
 @layer components {
+  /* Rolling numbers: a strip of digits behind a window one line tall.
+     See components/Rolling.jsx — the petrol-pump effect on live figures. */
+  .rolling { @apply inline-flex items-baseline; font-variant-numeric: tabular-nums; }
+  .rolling-window { display: inline-block; height: 1em; overflow: hidden; }
+  .rolling-strip { display: block; transition-property: transform; transition-timing-function: cubic-bezier(.2, .85, .25, 1); will-change: transform; }
+  .rolling-digit { display: block; height: 1em; line-height: 1em; }
+  .rolling-fixed { display: inline-block; }
+  @media (prefers-reduced-motion: reduce) {
+    .rolling-strip { transition: none !important; }
+  }
   .card { @apply rounded-xl border border-line bg-white shadow-card; }
   .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50; }
   .btn-primary { @apply btn bg-brand text-white hover:bg-brand-light; }

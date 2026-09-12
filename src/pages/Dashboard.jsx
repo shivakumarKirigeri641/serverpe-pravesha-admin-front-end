@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import Rolling from '../components/Rolling.jsx';
 import { clock, dayLabel, number, percent, plate, rupees, shiftDay } from '../lib/format';
 
 /*
@@ -364,7 +365,7 @@ function Tile({ label, stat, good, hint, note }) {
         <span className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</span>
         <Delta stat={stat} good={good} />
       </div>
-      <div className="mt-1.5 tabular text-3xl font-bold leading-none text-ink">{number(stat.value)}</div>
+      <div className="mt-1.5 tabular text-3xl font-bold leading-none text-ink"><Rolling text={number(stat.value)} /></div>
       <div className="mt-2 text-2xs text-muted">
         {hint && <>{hint}<span className="mx-1.5 text-line">|</span></>}
         yesterday {number(stat.previous)}
@@ -403,7 +404,7 @@ function Revenue({ revenue, config }) {
             <div className="text-sm font-semibold text-ink">Net revenue</div>
             <div className="text-2xs text-muted">Service fee, less GST and gateway charges</div>
           </div>
-          <div className="tabular text-lg font-bold text-ink">{rupees(revenue.netRevenue)}</div>
+          <div className="tabular text-lg font-bold text-ink"><Rolling text={rupees(revenue.netRevenue)} /></div>
         </li>
       </ul>
 
@@ -420,7 +421,7 @@ function Small({ label, value, sub, delta }) {
   return (
     <div className="px-4 py-3">
       <div className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</div>
-      <div className={`tabular mt-0.5 text-base font-bold ${value === null ? 'text-line' : 'text-ink'}`}>{value === null ? '—' : value}</div>
+      <div className={`tabular mt-0.5 text-base font-bold ${value === null ? 'text-line' : 'text-ink'}`}>{value === null ? '—' : <Rolling text={value} />}</div>
       {delta ? <Delta stat={delta} good="up" className="mt-1" /> : <div className="mt-1 text-2xs text-muted">{sub}</div>}
     </div>
   );
@@ -438,7 +439,7 @@ function SlotCard({ slot }) {
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="tabular text-lg font-bold text-ink">{number(slot.available)}</div>
+          <div className="tabular text-lg font-bold text-ink"><Rolling text={number(slot.available)} /></div>
           <div className="text-2xs text-muted">of {number(slot.capacity)} left</div>
         </div>
       </div>

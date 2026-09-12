@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import Rolling from '../components/Rolling.jsx';
 import { deliver } from '../lib/files';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate } from '../lib/format';
@@ -111,7 +112,7 @@ function Card({ label, value, sub, tone = 'text-ink', strong = false }) {
   return (
     <div className={`card p-4 ${strong ? 'border-brand/30 bg-brand/[0.03]' : ''}`}>
       <div className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</div>
-      <div className={`tabular mt-1.5 text-2xl font-bold leading-none ${tone}`}>{value}</div>
+      <div className={`tabular mt-1.5 text-2xl font-bold leading-none ${tone}`}><Rolling text={String(value)} /></div>
       {sub && <div className="mt-2 text-2xs text-muted">{sub}</div>}
     </div>
   );

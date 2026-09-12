@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import Rolling from '../components/Rolling.jsx';
 import { useSession, can } from '../lib/session';
 import { clock, number, plate } from '../lib/format';
 import { Banner, Field, Loading, Modal, Reason, reasonOk, useAction, when } from '../components/ui.jsx';
@@ -77,7 +78,7 @@ export default function Checkposts() {
                   ].map(([k, v]) => (
                     <div key={k} className="rounded-lg border border-line px-3 py-2">
                       <div className="text-2xs text-muted">{k}</div>
-                      <div className="tabular text-lg font-bold text-ink">{v}</div>
+                      <div className="tabular text-lg font-bold text-ink"><Rolling text={String(v)} /></div>
                     </div>
                   ))}
                 </div>
