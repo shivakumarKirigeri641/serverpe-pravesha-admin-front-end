@@ -116,6 +116,14 @@ export default function Shell({ title, subtitle, actions, children }) {
 
       {/* Content */}
       <div className="min-w-0 flex-1">
+        {/* While demonstration mode runs, every screen says so: generated
+            traffic must never be mistaken for real visitors. */}
+        {me?.simulation?.running && (
+          <div className="flex flex-wrap items-center justify-center gap-2 bg-watch-500 px-4 py-1.5 text-center text-2xs font-semibold text-white">
+            <span>Demonstration mode is on — bookings and gate activity on these screens are being generated, not real.</span>
+            <NavLink to="/settings/simulation" className="underline">Stop it</NavLink>
+          </div>
+        )}
         <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-white/95 px-4 backdrop-blur sm:px-6">
           <button type="button" className="lg:hidden" onClick={() => setOpen(true)} aria-label="Menu">
             <svg viewBox="0 0 24 24" className="h-6 w-6 text-ink" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

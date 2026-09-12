@@ -29,6 +29,8 @@ const ACTIONS = {
   user_access_changed: 'Enabled / disabled a panel user',
   user_password_reset: 'Reset a password',
   gst_business_changed: 'Changed GST or business details',
+  simulation_started: 'Started demonstration mode',
+  simulation_stopped: 'Stopped demonstration mode',
   alert_acknowledged: 'Acknowledged an alert',
   alert_reopened: 'Brought an alert back',
   destination_added: 'Added a destination',

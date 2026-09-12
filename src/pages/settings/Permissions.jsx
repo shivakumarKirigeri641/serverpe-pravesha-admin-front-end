@@ -5,7 +5,7 @@ import { Banner, Loading } from '../../components/ui.jsx';
 const GROUPS = [
   ['See', ['dashboard.view', 'live.view', 'alerts.view', 'destinations.view', 'health.view', 'analytics.view', 'reports.view', 'finance.view', 'conversations.view', 'conversations.technical', 'negative.view']],
   ['Act', ['alerts.act', 'announcements.manage', 'tickets.view', 'tickets.cancel', 'tickets.resend', 'negative.act', 'visitors.block', 'tickets.free', 'tickets.onspot', 'finance.expenses', 'finance.remit']],
-  ['Configure', ['destinations.manage', 'settings.pricing', 'settings.slots', 'settings.staff', 'settings.users', 'settings.gst', 'audit.view']],
+  ['Configure', ['destinations.manage', 'settings.pricing', 'settings.slots', 'settings.staff', 'settings.users', 'settings.gst', 'settings.simulation', 'audit.view']],
 ];
 
 /*

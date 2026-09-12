@@ -130,6 +130,8 @@ export const api = {
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
   health: () => call('/health'),
+  simulation: () => call('/settings/simulation'),
+  setSimulation: (body) => call('/settings/simulation', { method: 'PUT', body }),
   /* Destinations and checkposts. */
   destinations: () => call('/destinations'),
   destination: (id) => call(`/destinations/${id}`),
