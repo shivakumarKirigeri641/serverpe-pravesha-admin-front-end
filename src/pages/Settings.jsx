@@ -8,7 +8,6 @@ import Users from './settings/Users.jsx';
 import Permissions from './settings/Permissions.jsx';
 import Passes from './settings/Passes.jsx';
 import Gst from './settings/Gst.jsx';
-import Simulation from './settings/Simulation.jsx';
 
 /*
  * Settings — how the service runs: what it costs, when it opens, who works the
@@ -27,7 +26,6 @@ const TABS = [
   { key: 'users', label: 'Panel users', cap: 'settings.users', page: Users, blurb: 'Who can sign in here, and as what' },
   { key: 'permissions', label: 'Roles & permissions', cap: null, page: Permissions, blurb: 'What each role may do' },
   { key: 'gst', label: 'GST & business', cap: 'settings.gst', page: Gst, blurb: 'Tax, invoice numbering and legal details' },
-  { key: 'simulation', label: 'Demonstration mode', cap: 'settings.simulation', page: Simulation, blurb: 'Generate lifelike activity while showing the panel' },
 ];
 
 export default function Settings() {

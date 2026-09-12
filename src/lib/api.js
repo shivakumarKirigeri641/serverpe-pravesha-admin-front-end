@@ -130,8 +130,10 @@ export const api = {
   conversations: ({ q = null } = {}) => call(`/conversations${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   conversation: (id) => call(`/conversations/${encodeURIComponent(id)}`),
   health: () => call('/health'),
-  simulation: () => call('/settings/simulation'),
-  setSimulation: (body) => call('/settings/simulation', { method: 'PUT', body }),
+  /* Temporary demonstration tools — remove with the Demo page. */
+  demo: () => call('/demo'),
+  setDemoSimulation: (body) => call('/demo/simulation', { method: 'PUT', body }),
+  runDemoJob: (body) => call('/demo/run', { method: 'POST', body }),
   /* Destinations and checkposts. */
   destinations: () => call('/destinations'),
   destination: (id) => call(`/destinations/${id}`),

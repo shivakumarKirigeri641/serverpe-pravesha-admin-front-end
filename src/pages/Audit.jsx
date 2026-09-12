@@ -30,6 +30,8 @@ const ACTIONS = {
   user_password_reset: 'Reset a password',
   gst_business_changed: 'Changed GST or business details',
   simulation_started: 'Started demonstration mode',
+  demo_data_seeded: 'Generated test data',
+  demo_data_removed: 'Removed all test data',
   simulation_stopped: 'Stopped demonstration mode',
   alert_acknowledged: 'Acknowledged an alert',
   alert_reopened: 'Brought an alert back',

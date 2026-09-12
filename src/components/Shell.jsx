@@ -51,6 +51,13 @@ const NAV = [
     ],
   },
   {
+    /* Temporary: delete this group with the Demo page before launch. */
+    group: 'Demo',
+    items: [
+      { to: '/demo', label: 'Demo & test data', icon: FlaskIcon, cap: 'demo.simulate' },
+    ],
+  },
+  {
     group: 'Administer',
     items: [
       { to: '/settings', label: 'Settings', icon: CogIcon, cap: ['settings.pricing', 'settings.slots', 'settings.staff', 'settings.users', 'settings.gst', 'tickets.free', 'tickets.onspot'],
@@ -121,7 +128,7 @@ export default function Shell({ title, subtitle, actions, children }) {
         {me?.simulation?.running && (
           <div className="flex flex-wrap items-center justify-center gap-2 bg-watch-500 px-4 py-1.5 text-center text-2xs font-semibold text-white">
             <span>Demonstration mode is on — bookings and gate activity on these screens are being generated, not real.</span>
-            <NavLink to="/settings/simulation" className="underline">Stop it</NavLink>
+            <NavLink to="/demo" className="underline">Stop it</NavLink>
           </div>
         )}
         <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-line bg-white/95 px-4 backdrop-blur sm:px-6">
@@ -175,6 +182,7 @@ function RupeeIcon(p) { return <Svg {...p}><path d="M7 5h10M7 9h10M15.5 5c0 4-3 
 function DocIcon(p) { return <Svg {...p}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></Svg>; }
 function PinIcon(p) { return <Svg {...p}><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></Svg>; }
 function GateIcon(p) { return <Svg {...p}><path d="M3 20V9l9-4 9 4v11" /><path d="M3 20h18M9 20v-6h6v6" /></Svg>; }
+function FlaskIcon(p) { return <Svg {...p}><path d="M9 3h6M10 3v6L5 19a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 19l-5-10V3" /><path d="M7.5 14h9" /></Svg>; }
 function CogIcon(p) { return <Svg {...p}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></Svg>; }
 function HeartIcon(p) { return <Svg {...p}><path d="M3 12h4l2-4 3 8 2-4h7" /><path d="M20.5 8.5a4.6 4.6 0 0 0-8.5-2 4.6 4.6 0 0 0-8.5 2" strokeOpacity=".45" /></Svg>; }
 function ShieldIcon(p) { return <Svg {...p}><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6Z" /><path d="m9 12 2 2 4-4" /></Svg>; }
