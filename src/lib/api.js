@@ -158,6 +158,13 @@ export const api = {
   vehicles: (params = {}) =>
     call(`/vehicles?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   vehicle: (regNo) => call(`/vehicles/${encodeURIComponent(regNo)}`),
+
+  /* Passes sold at a barrier: the totals a shift is reconciled against, and
+     every sale behind them. */
+  onspotSummary: (params = {}) =>
+    call(`/onspot/summary?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  onspotSales: (params = {}) =>
+    call(`/onspot?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   /* Notifications. */
   alerts: () => call('/alerts'),
   ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),

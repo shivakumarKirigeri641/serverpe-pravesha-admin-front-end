@@ -41,6 +41,7 @@ const NAV = [
   {
     group: 'Money',
     items: [
+      { to: '/onspot', label: 'Gate sales', icon: RupeeIcon, cap: 'onspot.view' },
       { to: '/payments', label: 'Payments & Settlements', icon: SplitIcon, cap: 'finance.view' },
       { to: '/finance', label: 'My GST & Invoices', icon: RupeeIcon, cap: 'finance.view' },
     ],
