@@ -43,6 +43,7 @@ const ACTIONS = {
   checkpost_status_changed: 'Took a checkpost in or out of use',
   announcement_published: 'Published an announcement',
   announcement_ended: 'Ended an announcement',
+  vehicle_rechecked: 'Asked the vehicle register again',
   ticket_cancelled: 'Cancelled a pass',
   pass_resent: 'Sent a pass again',
   pass_opened: 'Opened a pass PDF',

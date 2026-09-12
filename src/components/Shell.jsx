@@ -24,6 +24,7 @@ const NAV = [
       { to: '/analytics', label: 'Data analytics', icon: ChartIcon, cap: 'analytics.view' },
       { to: '/reports', label: 'Reports', icon: ReportIcon, cap: 'reports.view' },
       { to: '/negative', label: 'Negative tracking', icon: AlertIcon, cap: 'negative.view' },
+      { to: '/unverified', label: 'Unverified vehicles', icon: QueryIcon, cap: 'unverified.view' },
     ],
   },
   {
@@ -168,6 +169,7 @@ const Svg = ({ className = 'h-4 w-4', children }) => (
 );
 
 function GridIcon(p) { return <Svg {...p}><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></Svg>; }
+function QueryIcon(p) { return <Svg {...p}><path d="M5 17h3l1.5-9 2 12L14 7l1.5 10H19" /><circle cx="12" cy="12" r="9" strokeOpacity=".35" /></Svg>; }
 function AlertIcon(p) { return <Svg {...p}><path d="M12 3 2.5 20h19Z" /><path d="M12 10v4M12 17.2v.3" /></Svg>; }
 function ReportIcon(p) { return <Svg {...p}><path d="M6 3h9l4 4v14H6Z" /><path d="M14 3v5h5" /><path d="M9 17v-3M12 17v-6M15 17v-2" /></Svg>; }
 function ChatIcon(p) { return <Svg {...p}><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /><path d="M8.5 11h7M8.5 14h4" /></Svg>; }

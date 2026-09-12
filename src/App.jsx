@@ -11,6 +11,7 @@ import Finance from './pages/Finance.jsx';
 import Payments from './pages/Payments.jsx';
 import Tickets from './pages/Tickets.jsx';
 import Notifications from './pages/Notifications.jsx';
+import Unverified from './pages/Unverified.jsx';
 import Destinations from './pages/Destinations.jsx';
 import Checkposts from './pages/Checkposts.jsx';
 import Health from './pages/Health.jsx';
@@ -47,6 +48,7 @@ export default function App() {
       {can(me, 'conversations.view') && <Route path="/conversations" element={<Conversations />} />}
       {can(me, 'reports.view') && <Route path="/reports" element={<Reports />} />}
       {can(me, 'negative.view') && <Route path="/negative" element={<Negative />} />}
+      {can(me, 'unverified.view') && <Route path="/unverified" element={<Unverified />} />}
       <Route path="/settings" element={<Settings />} />
       <Route path="/settings/:tab" element={<Settings />} />
       {can(me, 'audit.view') && <Route path="/audit" element={<Audit />} />}

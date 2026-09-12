@@ -146,6 +146,9 @@ export const api = {
   addCheckpost: (body) => call('/checkposts', { method: 'POST', body }),
   updateCheckpost: (id, body) => call(`/checkposts/${id}`, { method: 'PUT', body }),
   setCheckpostActive: (id, active, reason) => call(`/checkposts/${id}/active`, { method: 'POST', body: { active, reason } }),
+  /* Vehicles the register could not verify. */
+  unverified: (params) => call(`/unverified?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  recheckVehicle: (regNo, reason) => call('/unverified/recheck', { method: 'POST', body: { regNo, reason } }),
   /* Notifications. */
   alerts: () => call('/alerts'),
   ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),
