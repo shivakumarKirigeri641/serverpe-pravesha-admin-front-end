@@ -6,6 +6,7 @@ import { deliver } from '../lib/files';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate, rupees } from '../lib/format';
 import { Banner, Field, Loading, Modal, Reason, reasonOk, useAction, when } from '../components/ui.jsx';
+import Photos from '../components/Photos.jsx';
 
 /*
  * Ticket Management — find any pass and see all of it.
@@ -248,6 +249,8 @@ function TicketDetail({ id, onBack }) {
               ]} />
             )}
           </div>
+
+          {data.photos?.length > 0 && <Photos photos={data.photos} />}
 
           <section>
             <h2 className="mb-2 text-[15px] font-semibold text-ink">History</h2>

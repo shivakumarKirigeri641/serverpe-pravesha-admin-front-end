@@ -31,6 +31,54 @@ const IDENTITY_LABEL = {
   chassis: 'Chassis', engine: 'Engine', tr_paper: 'TR paper', invoice: 'Invoice', licence: 'Licence', other: 'Note',
 };
 
+/*
+ * Thumbnails on a row.
+ *
+ * Small on purpose: this is a table of other people's vehicles, and the point
+ * here is "there is a photograph, and it looks like a vehicle", not a gallery.
+ * Clicking opens it full size. Loaded with the session token, from a blob, for
+ * the same reason the reports are.
+ */
+function Thumbs({ photos }) {
+  const [urls, setUrls] = useState({});
+  const [big, setBig] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+    const made = [];
+    (async () => {
+      for (const ph of photos) {
+        try {
+          const url = await api.photoUrl(ph.id);
+          made.push(url);
+          if (!alive) return;
+          setUrls((m) => ({ ...m, [ph.id]: url }));
+        } catch { /* leave the frame empty */ }
+      }
+    })();
+    return () => { alive = false; made.forEach(URL.revokeObjectURL); };
+  }, [photos]);
+
+  return (
+    <>
+      <div className="mt-1 flex gap-1">
+        {photos.map((ph) => (
+          <button key={ph.id} type="button" title="Photograph taken at the gate"
+            onClick={() => urls[ph.id] && setBig(urls[ph.id])}
+            className="h-10 w-10 overflow-hidden rounded border border-line bg-shell">
+            {urls[ph.id] && <img src={urls[ph.id]} alt="" className="h-full w-full object-cover" />}
+          </button>
+        ))}
+      </div>
+      {big && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-ink/80 p-6" onClick={() => setBig(null)}>
+          <img src={big} alt="" className="max-h-full max-w-full rounded-lg" />
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Unverified() {
   const { me } = useSession();
   const [q, setQ] = useState('');
@@ -179,6 +227,9 @@ export default function Unverified() {
                           </>
                         ) : <span className="text-2xs text-wrong-700">nothing recorded</span>}
                         <div className="text-2xs text-muted">{p.mobile}</div>
+                        {/* The photograph is the one description of the vehicle
+                            nobody typed, so it sits on the row beside what was. */}
+                        {p.photos?.length > 0 && <Thumbs photos={p.photos} />}
                       </td>
                       <td className="td"><div className="text-sm text-ink">{p.type}</div><div className="text-2xs text-muted">{p.declaredClass}</div></td>
                       <td className="td"><div className="whitespace-nowrap text-sm">{dayLabel(p.travelDate)}</div><div className="text-2xs text-muted">{p.slot}</div></td>

@@ -163,6 +163,10 @@ export const api = {
   ticketSearch: (params) => call(`/tickets/search?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   ticket: (id) => call(`/tickets/${encodeURIComponent(id)}/detail`),
   passFile: (id) => file(`/tickets/${id}/pass.pdf`),
+  /* A photograph taken at a barrier. Fetched with the session token and shown
+     from a blob, for the same reason reports are: an <img src> cannot carry an
+     Authorization header, and a token in a URL outlives the page in history. */
+  photoUrl: async (id) => URL.createObjectURL((await file(`/photo/${encodeURIComponent(id)}`)).blob),
   cancelTicket: (id, reason) => call(`/tickets/${id}/cancel`, { method: 'POST', body: { reason } }),
   resendTicket: (id, reason) => call(`/tickets/${id}/resend`, { method: 'POST', body: { reason } }),
   /* Payments & Settlements. */
