@@ -192,6 +192,11 @@ function OneVehicle({ regNo }) {
     <Shell
       title={v.kind === 'no_plate' ? v.regNo : plate(v.regNo)}
       subtitle={[v.maker, v.model].filter(Boolean).join(' ') || v.vehicleClass || 'Vehicle'}
+      /* Back goes back where they came from — often another vehicle, reached
+         from a visitor's other vehicles — and falls back to the list when this
+         page was opened directly from a link or a reload. */
+      onBack={() => (window.history.length > 1 ? navigate(-1) : navigate('/vehicles'))}
+      backLabel="Vehicles"
       actions={<button type="button" className="btn-quiet" onClick={() => navigate('/vehicles')}>All vehicles</button>}
     >
       {!v.allowed && (

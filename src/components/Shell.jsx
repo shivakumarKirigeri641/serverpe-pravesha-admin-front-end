@@ -71,7 +71,7 @@ const NAV = [
   },
 ];
 
-export default function Shell({ title, subtitle, actions, children }) {
+export default function Shell({ title, subtitle, actions, onBack, backLabel = 'Back', children }) {
   const { me, signOut } = useSession();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
@@ -139,6 +139,23 @@ export default function Shell({ title, subtitle, actions, children }) {
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
           </button>
+
+          {/*
+            * The way out of a detail screen, where the eye looks for it: left of
+            * the title, not tucked among the actions on the right. A screen you
+            * opened by tapping a row needs a visible way back, because the
+            * browser's own Back button is a long reach on a laptop and absent on
+            * a wall display.
+            */}
+          {onBack && (
+            <button type="button" onClick={onBack} aria-label={backLabel}
+              className="-ml-1 flex shrink-0 items-center gap-1 rounded-lg px-2 py-1.5 text-2xs font-semibold text-muted hover:bg-shell hover:text-ink">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 5l-7 7 7 7" />
+              </svg>
+              <span className="hidden sm:inline">{backLabel}</span>
+            </button>
+          )}
 
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-[15px] font-semibold text-ink">{title}</h1>
