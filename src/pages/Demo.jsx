@@ -73,7 +73,15 @@ function Simulation({ data, onChanged }) {
   const { busy, error, run } = useAction();
 
   const switchIt = async (enabled) => {
-    const out = await run(() => api.setDemoSimulation({ enabled, rate, hours: hours === 'never' ? 'never' : Number(hours), reason }));
+    /*
+     * STOPPING IS NEVER BLOCKED. Starting it asks for a reason, which is right —
+     * somebody should say why generated traffic is about to appear. Requiring
+     * one to stop made the safety switch refuse to be pressed, which is the
+     * opposite of a safety switch; the audit row simply says it was stopped
+     * from the panel.
+     */
+    const why = enabled ? reason : (reason.trim() || 'Stopped from the panel');
+    const out = await run(() => api.setDemoSimulation({ enabled, rate, hours: hours === 'never' ? 'never' : Number(hours), reason: why }));
     if (out) {
       setReason('');
       onChanged(out, enabled
@@ -108,7 +116,7 @@ function Simulation({ data, onChanged }) {
             )}
           </div>
           {sim.enabled && (
-            <button type="button" className="btn bg-wrong-500 text-white hover:bg-wrong-700" disabled={busy || !reasonOk(reason)} onClick={() => switchIt(false)}>
+            <button type="button" className="btn bg-wrong-500 text-white hover:bg-wrong-700" disabled={busy} onClick={() => switchIt(false)}>
               {busy ? 'Stopping…' : 'Stop now'}
             </button>
           )}
@@ -191,6 +199,7 @@ function Simulation({ data, onChanged }) {
 
         <div className="mt-4 max-w-2xl">
           <Reason value={reason} onChange={setReason} placeholder="e.g. Demonstration for the department at 11am" />
+          <p className="-mt-1 text-2xs text-muted">Needed to start it. Stopping never needs one.</p>
           {error && <Banner tone="wrong" className="mt-3">{error}</Banner>}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button type="button" className="btn-primary" disabled={busy || !data.available || !reasonOk(reason)} onClick={() => switchIt(true)}>

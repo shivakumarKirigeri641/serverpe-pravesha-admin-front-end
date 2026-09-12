@@ -11,11 +11,23 @@ import { clock, number, percent, plate } from '../lib/format';
 /*
  * Live monitoring — what is happening at the gates right now.
  *
- * IT POLLS, AND SAYS WHEN IT LAST HEARD. Every few seconds, and only while the
- * tab is visible: a screen left on a wall overnight should not hammer the server
- * for nobody. The header carries the time of the last answer, so a frozen screen
- * is visibly frozen rather than quietly stale — the worst failure for a live
- * view is looking alive while showing yesterday.
+ * IT REFRESHES WHEN SOMETHING HAPPENS, NOT WHEN THE CLOCK TICKS. Every couple
+ * of seconds it asks the server one cheap question — has anything happened? —
+ * and only when the answer changes does it rebuild itself. Something means a
+ * vehicle checked at a barrier, a pass sold by any route, or a member of staff
+ * starting or ending a shift. On a quiet afternoon the screen therefore sits
+ * still instead of redrawing a table of the same rows every five seconds and
+ * rolling 41 to 41; when a gate is busy it keeps up within a couple of seconds.
+ *
+ * IT STILL REFRESHES ON ITS OWN OCCASIONALLY. Some of what is shown ages by the
+ * clock rather than by events — how long the vehicle at the barrier has been
+ * there, how long since a phone was last heard from — so a full refresh happens
+ * every two minutes regardless, and only while the tab is visible: a screen left
+ * on a wall overnight should not hammer the server for nobody.
+ *
+ * IT SAYS WHEN IT LAST HEARD, so a frozen screen is visibly frozen rather than
+ * quietly stale — the worst failure for a live view is looking alive while
+ * showing yesterday.
  *
  * EVERY COMPARISON IS AGAINST YESTERDAY AT THIS HOUR, computed by the back-end.
  * Comparing eleven in the morning against a whole day would report a collapse
@@ -26,7 +38,8 @@ import { clock, number, percent, plate } from '../lib/format';
  * re-reading the whole table.
  */
 
-const POLL_MS = 5000;
+const ASK_MS = 2000;        // how often to ask whether anything has happened
+const ANYWAY_MS = 120000;   // a full refresh regardless, for what ages by the clock
 
 export default function Live() {
   const [data, setData] = useState(null);
@@ -34,6 +47,10 @@ export default function Live() {
   const [updatedAt, setUpdatedAt] = useState(null);
   const [fresh, setFresh] = useState(() => new Set());
   const seen = useRef(new Set());
+  /* The last "nothing has changed" signature the server gave us, and when we
+     last rebuilt — together they decide whether the next tick does any work. */
+  const beat = useRef(null);
+  const loadedAt = useRef(0);
 
   /*
    * The feed pages backwards through the day. Page one is live and keeps
@@ -57,6 +74,7 @@ export default function Live() {
       setFresh(added);
       setData(d);
       setUpdatedAt(new Date());
+      loadedAt.current = Date.now();
       setError(null);
     } catch (e) {
       setError(e.message);
@@ -98,11 +116,31 @@ export default function Live() {
   const backToLive = useCallback(() => { trail.current = []; setFeed(null); setPageNo(1); }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  /*
+   * The tick. It asks the cheap question; a full refresh follows only if the
+   * answer moved, or if it has been long enough that the clock-bound parts of
+   * the screen have gone stale. A failed question is left to the next tick —
+   * the header already says how long ago the last real answer was.
+   */
   useEffect(() => {
-    const id = setInterval(() => { if (document.visibilityState === 'visible') load(); }, POLL_MS);
+    let alive = true;
+    const tick = async () => {
+      if (!alive || document.visibilityState !== 'visible') return;
+      try {
+        const p = await api.livePulse();
+        if (!alive) return;
+        const moved = beat.current !== null && p.pulse !== beat.current;
+        beat.current = p.pulse;
+        if (moved || Date.now() - loadedAt.current >= ANYWAY_MS) await load();
+      } catch {
+        /* Nothing to show for it: the next tick tries again. */
+      }
+    };
+    const id = setInterval(tick, ASK_MS);
     const onShow = () => document.visibilityState === 'visible' && load();
     document.addEventListener('visibilitychange', onShow);
-    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onShow); };
+    return () => { alive = false; clearInterval(id); document.removeEventListener('visibilitychange', onShow); };
   }, [load]);
 
   const v = data?.visitors;

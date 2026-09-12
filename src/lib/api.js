@@ -98,6 +98,8 @@ export const api = {
   /* Polled every few seconds by the live screen, so it fails fast rather than
      leaving a watcher staring at a frozen page. */
   live: () => call('/live', { timeoutMs: 12000 }),
+  /* The small "has anything happened?" question, asked between refreshes. */
+  livePulse: () => call('/live/pulse', { timeoutMs: 8000 }),
   /* Older pages of the gate feed. `before` is the cursor the previous page
      returned — a time and an id, not an offset. */
   analytics: ({ from, to }) => call(`/analytics?from=${from}&to=${to}`),
