@@ -25,7 +25,7 @@ import { clock, number, percent, plate } from '../lib/format';
  * re-reading the whole table.
  */
 
-const POLL_MS = 8000;
+const POLL_MS = 5000;
 
 export default function Live() {
   const [data, setData] = useState(null);
