@@ -165,6 +165,13 @@ export const api = {
     call(`/onspot/summary?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   onspotSales: (params = {}) =>
     call(`/onspot?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+
+  /* What visitors said, and the deliberate act of quoting one publicly. */
+  feedbackOverview: (params = {}) =>
+    call(`/feedback/overview?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  feedbackList: (params = {}) =>
+    call(`/feedback?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  publishFeedback: (id, body) => call(`/feedback/${id}/publish`, { method: 'POST', body }),
   /* Notifications. */
   alerts: () => call('/alerts'),
   ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),

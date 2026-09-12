@@ -14,6 +14,7 @@ import Notifications from './pages/Notifications.jsx';
 import Unverified from './pages/Unverified.jsx';
 import Vehicles from './pages/Vehicles.jsx';
 import OnSpot from './pages/OnSpot.jsx';
+import Feedback from './pages/Feedback.jsx';
 import Destinations from './pages/Destinations.jsx';
 import Checkposts from './pages/Checkposts.jsx';
 import Health from './pages/Health.jsx';
@@ -52,6 +53,7 @@ export default function App() {
       {can(me, 'negative.view') && <Route path="/negative" element={<Negative />} />}
       {can(me, 'unverified.view') && <Route path="/unverified" element={<Unverified />} />}
       {can(me, 'onspot.view') && <Route path="/onspot" element={<OnSpot />} />}
+      {can(me, 'feedback.view') && <Route path="/feedback" element={<Feedback />} />}
       {can(me, 'vehicles.view') && <Route path="/vehicles" element={<Vehicles />} />}
       {can(me, 'vehicles.view') && <Route path="/vehicles/:regNo" element={<Vehicles />} />}
       <Route path="/settings" element={<Settings />} />
