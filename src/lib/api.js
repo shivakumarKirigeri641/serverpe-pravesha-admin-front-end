@@ -151,6 +151,13 @@ export const api = {
   /* Vehicles the register could not verify. */
   unverified: (params) => call(`/unverified?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   recheckVehicle: (regNo, reason) => call('/unverified/recheck', { method: 'POST', body: { regNo, reason } }),
+
+  /* The vehicle register: every vehicle that has ever been here, and one
+     vehicle's whole history. Money comes back stripped unless the session may
+     see it, and the body says so. */
+  vehicles: (params = {}) =>
+    call(`/vehicles?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
+  vehicle: (regNo) => call(`/vehicles/${encodeURIComponent(regNo)}`),
   /* Notifications. */
   alerts: () => call('/alerts'),
   ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),
