@@ -239,7 +239,10 @@ function PublishModal({ item, onClose, onDone }) {
       <div className="mt-4 flex justify-end gap-2">
         <button type="button" className="btn-quiet" onClick={onClose}>Cancel</button>
         <button type="button" className="btn-primary" disabled={busy || name.trim().length < 2 || !reasonOk(reason)}
-          onClick={() => run(() => api.publishFeedback(item.id, { publish: true, displayName: name.trim(), reason }), onDone)}>
+          onClick={async () => {
+            const out = await run(() => api.publishFeedback(item.id, { publish: true, displayName: name.trim(), reason }));
+            if (out) onDone();
+          }}>
           {busy ? 'Publishing…' : 'Publish'}
         </button>
       </div>
@@ -268,7 +271,10 @@ function WithdrawModal({ item, onClose, onDone }) {
       <div className="mt-4 flex justify-end gap-2">
         <button type="button" className="btn-quiet" onClick={onClose}>Cancel</button>
         <button type="button" className="btn bg-wrong-500 text-white hover:bg-wrong-700" disabled={busy || !reasonOk(reason)}
-          onClick={() => run(() => api.publishFeedback(item.id, { publish: false, reason }), onDone)}>
+          onClick={async () => {
+            const out = await run(() => api.publishFeedback(item.id, { publish: false, reason }));
+            if (out) onDone();
+          }}>
           {busy ? 'Taking down…' : 'Take down'}
         </button>
       </div>

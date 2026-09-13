@@ -8,6 +8,7 @@ import Users from './settings/Users.jsx';
 import Permissions from './settings/Permissions.jsx';
 import Passes from './settings/Passes.jsx';
 import Gst from './settings/Gst.jsx';
+import Reports from './settings/Reports.jsx';
 
 /*
  * Settings — how the service runs: what it costs, when it opens, who works the
@@ -25,6 +26,7 @@ const TABS = [
   { key: 'passes', label: 'Free & on-spot passes', cap: ['tickets.free', 'tickets.onspot'], page: Passes, blurb: 'Passes issued from the panel' },
   { key: 'users', label: 'Panel users', cap: 'settings.users', page: Users, blurb: 'Who can sign in here, and as what' },
   { key: 'permissions', label: 'Roles & permissions', cap: null, page: Permissions, blurb: 'What each role may do' },
+  { key: 'reports', label: 'Period reports', cap: 'reports.view', page: Reports, blurb: 'Who receives the evening report, and what it will say' },
   { key: 'gst', label: 'GST & business', cap: 'settings.gst', page: Gst, blurb: 'Tax, invoice numbering and legal details' },
 ];
 

@@ -172,6 +172,11 @@ export const api = {
   feedbackList: (params = {}) =>
     call(`/feedback?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   publishFeedback: (id, body) => call(`/feedback/${id}/publish`, { method: 'POST', body }),
+
+  /* The evening report: who receives it, what it will say, and one sent by hand. */
+  periodReport: () => call('/reports/period'),
+  savePeriodReport: (body) => call('/reports/period', { method: 'PUT', body }),
+  sendPeriodReport: (body) => call('/reports/period/send', { method: 'POST', body }),
   /* Notifications. */
   alerts: () => call('/alerts'),
   ackAlert: (key, hours, note) => call('/alerts/ack', { method: 'POST', body: { key, hours, note } }),
