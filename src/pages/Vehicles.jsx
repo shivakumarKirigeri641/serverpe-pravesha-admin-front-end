@@ -33,16 +33,16 @@ import { Banner, Loading, when } from '../components/ui.jsx';
 
 const KIND_TONE = {
   rc: 'bg-good-50 text-good-700',
-  declared: 'bg-warn-50 text-warn-700',
+  declared: 'bg-watch-50 text-watch-700',
   no_plate: 'bg-wrong-50 text-wrong-700',
 };
 
 const VERDICTS = {
   valid: ['Entered', 'bg-good-50 text-good-700'],
-  valid_override: ['Allowed in', 'bg-warn-50 text-warn-700'],
+  valid_override: ['Allowed in', 'bg-watch-50 text-watch-700'],
   already_used: ['Refused — already used', 'bg-wrong-50 text-wrong-700'],
   wrong_day: ['Refused — wrong day', 'bg-wrong-50 text-wrong-700'],
-  wrong_slot: ['Outside the slot', 'bg-warn-50 text-warn-700'],
+  wrong_slot: ['Outside the slot', 'bg-watch-50 text-watch-700'],
   wrong_place: ['Refused — wrong place', 'bg-wrong-50 text-wrong-700'],
   not_paid: ['Refused — not paid', 'bg-wrong-50 text-wrong-700'],
   unknown_ticket: ['No pass found', 'bg-wrong-50 text-wrong-700'],
@@ -55,7 +55,7 @@ const STATUS = {
   paid: ['Not used', 'bg-shell text-muted'],
   cancelled: ['Cancelled', 'bg-wrong-50 text-wrong-700'],
   expired: ['Abandoned', 'bg-shell text-muted'],
-  held: ['Being paid for', 'bg-warn-50 text-warn-700'],
+  held: ['Being paid for', 'bg-watch-50 text-watch-700'],
 };
 
 const SORTS = [['recent', 'Last visit'], ['visits', 'Most visits'], ['revenue', 'Most paid'], ['plate', 'Number']];

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { plate } from '../lib/format';
+import { onBusyChange } from '../lib/api';
 
 /*
  * The small pieces every settings screen is built from, so a change looks and
@@ -138,10 +139,74 @@ export function Plates({ list, shown = 2 }) {
   );
 }
 
-export function Loading({ rows = 4 }) {
+/*
+ * Waiting, in the shape of what is coming.
+ *
+ * Blocks the size of the cards or rows about to appear, lit by a slow sweep,
+ * so the screen does not jump when the answer lands and nobody is looking at
+ * blank white wondering whether it broke. `head` draws the strip of figures
+ * some screens carry above their table.
+ */
+export function Loading({ rows = 4, head = 0 }) {
   return (
-    <div className="space-y-3">
-      {Array.from({ length: rows }, (_, i) => <div key={i} className="card h-14 animate-pulse" />)}
+    <div className="space-y-3" aria-busy="true" aria-live="polite">
+      <span className="sr-only">Loading…</span>
+      {head > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: head }, (_, i) => <div key={i} className="skeleton h-[76px]" />)}
+        </div>
+      )}
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="skeleton h-14" style={{ animationDelay: `${i * 90}ms` }} />
+      ))}
+    </div>
+  );
+}
+
+/** The same, in the shape of a table: a header strip and its rows. */
+export function LoadingTable({ rows = 6, columns = 5 }) {
+  return (
+    <div className="card overflow-hidden" aria-busy="true">
+      <div className="flex gap-4 border-b border-line bg-shell px-4 py-3">
+        {Array.from({ length: columns }, (_, i) => <div key={i} className="skeleton h-3 flex-1" />)}
+      </div>
+      {Array.from({ length: rows }, (_, r) => (
+        <div key={r} className="flex items-center gap-4 border-b border-line px-4 py-3.5 last:border-0">
+          {Array.from({ length: columns }, (_, c) => (
+            <div key={c} className={`skeleton h-3.5 ${c === 0 ? 'flex-[1.6]' : 'flex-1'}`} style={{ animationDelay: `${(r * columns + c) * 35}ms` }} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/*
+ * The thin bar across the top of the panel, while the panel is asking the
+ * server something. It is deliberately late: a question answered in under a
+ * quarter of a second flashes nothing at all, because a bar that appears and
+ * vanishes on every click is worse than no bar.
+ */
+export function BusyBar() {
+  const [shown, setShown] = useState(false);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => onBusyChange((n) => {
+    if (n > 0) {
+      clearTimeout(BusyBar.hide);
+      BusyBar.show = setTimeout(() => { setDone(false); setShown(true); }, 250);
+    } else {
+      clearTimeout(BusyBar.show);
+      setDone(true);
+      BusyBar.hide = setTimeout(() => { setShown(false); setDone(false); }, 320);
+    }
+  }), []);
+
+  if (!shown) return null;
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5" role="presentation">
+      <div className={`h-full bg-brand-accent shadow-[0_0_8px_rgba(0,168,132,.7)] ${done ? 'w-full transition-all duration-300' : 'bar-creep'}`}
+        style={done ? { opacity: 0, transition: 'width .2s ease-out, opacity .3s ease-out .12s' } : undefined} />
     </div>
   );
 }

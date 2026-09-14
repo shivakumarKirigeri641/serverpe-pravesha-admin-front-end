@@ -49,6 +49,34 @@ const GLOSSARY = {
   declared: 'The vehicle register could not identify the vehicle, so the staff member said what it was — which also set the price.',
   'no plate': 'A vehicle with no number plate at all, identified by hand (usually a chassis number) and photographed at the barrier.',
 
+  /* The days ahead */
+  'how full': 'Places already booked or being paid for, against the places the day has. A day at 95% or more is one to roster for.',
+  'busiest day': 'The day in this range with the largest share of its places taken. Not the most passes — a day with fewer places can be fuller.',
+  'days nearly full': 'Days at 95% of their places or more. These are the ones to roster staff for and to warn the road people about.',
+  left: 'Places still to sell: the places the slot has, less what is booked and what is being paid for right now.',
+
+  /* Where they come from */
+  'vehicles counted': 'Distinct vehicles seen at a gate in this period. One that came up nine times counts once here — the arrivals figure beside it counts all nine.',
+  'from elsewhere': 'Vehicles whose plates are registered outside this state. Read off the first two letters of the plate, which never change.',
+  'home state': 'The state most of the vehicles are registered in — for Mullayanagiri, Karnataka.',
+  arrivals: 'Every admitted check. The same vehicle arriving on four weekends is four arrivals and one vehicle.',
+  'office not known': 'We have not fetched this vehicle’s registration certificate, so the district is not known. What is shown is the RTO code printed on its plate.',
+
+  /* Who comes back */
+  'came back': 'The share of visitors who have entered more than once, ever — not only within this period.',
+  'first-time': 'One recorded visit.',
+  occasional: 'Two or three visits.',
+  returning: 'Four to seven visits.',
+  frequent: 'Eight visits or more. Often a taxi, a tour operator or somebody who lives nearby.',
+  'per month': 'Visits per month, worked out across the time between their first and last visit — not across the period on screen.',
+  'usual slot': 'The slot this visitor books most often.',
+
+  /* Gate staff */
+  'check took': 'From opening the pass to recording the verdict. A slow average usually means a queue, not a slow staff member.',
+  overrides: 'Vehicles a staff member let in outside their slot. Allowed, and recorded with their name on it.',
+  refused: 'Checks that ended in the vehicle being turned away.',
+  handover: 'What a shift did, saved when the staff member signs off: checked, let in, overridden, refused, and what was sold at the gate.',
+
   /* Money */
   collected: 'Money actually taken for passes on this date, before any refund.',
   'department amount': 'The entry fees, collected on the Tourism Department’s behalf. Not ours.',

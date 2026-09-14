@@ -4,6 +4,8 @@ import {
 } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import Patterns from '../components/Patterns.jsx';
+import Origins from '../components/Origins.jsx';
+import Explain from '../components/Explain.jsx';
 import StaffTrend from '../components/StaffTrend.jsx';
 import { Plates } from '../components/ui.jsx';
 import { api } from '../lib/api';
@@ -28,6 +30,7 @@ import { clock, dayLabel, number, percent, plate, rupees, shiftDay } from '../li
 const TABS = [
   ['traffic', 'Traffic'],
   ['patterns', 'Patterns'],
+  ['origins', 'Where from'],
   ['daily', 'Day-wise'],
   ['compare', 'Compare'],
   ['visitors', 'Visitors'],
@@ -80,7 +83,7 @@ export default function Analytics() {
 
   useEffect(() => { load(); }, [load]);
 
-  const usesRange = tab === 'traffic' || tab === 'patterns' || tab === 'daily' || tab === 'staff';
+  const usesRange = tab === 'traffic' || tab === 'patterns' || tab === 'origins' || tab === 'daily' || tab === 'staff';
 
   return (
     <Shell
@@ -134,6 +137,7 @@ export default function Analytics() {
 
       {tab === 'traffic' && data && <Traffic data={data} loading={loading} />}
       {tab === 'patterns' && range && <Patterns range={range} />}
+      {tab === 'origins' && range && <Origins range={range} />}
       {tab === 'daily' && data && <Daily rows={data.daily} money={!data.financeHidden} />}
       {tab === 'staff' && data && (
         <div className="space-y-5">
@@ -191,10 +195,17 @@ function Card({ title, note, children, className = '' }) {
   );
 }
 
+/*
+ * Every figure explains itself where we have words for it.
+ *
+ * The label is put through Explain rather than printed, so any label the
+ * glossary knows gains its dotted underline and its note without each screen
+ * having to ask; one it does not know renders as plain text, exactly as before.
+ */
 function Figure({ label, value, sub }) {
   return (
-    <div className="card p-4">
-      <div className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</div>
+    <div className="card card-hover p-4">
+      <div className="text-2xs font-semibold uppercase tracking-wider text-muted"><Explain term={label}>{label}</Explain></div>
       <div className="tabular mt-1.5 text-2xl font-bold leading-none text-ink">{value}</div>
       {sub && <div className="mt-1.5 text-2xs text-muted">{sub}</div>}
     </div>

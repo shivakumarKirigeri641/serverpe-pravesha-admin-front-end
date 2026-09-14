@@ -19,6 +19,23 @@ const listeners = new Set();
 export const onSignedOut = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
 const signedOut = () => { setToken(null); listeners.forEach((fn) => fn()); };
 
+/*
+ * HOW MANY QUESTIONS ARE STILL UNANSWERED.
+ *
+ * Counted here rather than screen by screen, so the bar across the top of the
+ * panel is telling the truth about the whole panel: it appears while anything
+ * is being fetched and goes when the last answer is in. Screens that already
+ * have content on them are the reason it exists — a table redrawing with new
+ * figures looks identical to a table that has stopped working.
+ *
+ * The live screen's own quiet polling is left out (`quiet`), or the bar would
+ * flicker every few seconds all day and stop meaning anything.
+ */
+let busy = 0;
+const busyWatchers = new Set();
+export const onBusyChange = (fn) => { busyWatchers.add(fn); fn(busy); return () => busyWatchers.delete(fn); };
+const setBusy = (delta) => { busy = Math.max(0, busy + delta); busyWatchers.forEach((fn) => fn(busy)); };
+
 export class ApiError extends Error {
   constructor(message, { code = 'error', status = 0, body = null } = {}) {
     super(message);
@@ -29,13 +46,14 @@ export class ApiError extends Error {
   }
 }
 
-async function call(path, { method = 'GET', body, auth = true, timeoutMs = 20000 } = {}) {
+async function call(path, { method = 'GET', body, auth = true, timeoutMs = 20000, quiet = false } = {}) {
   const headers = { Accept: 'application/json' };
   if (body) headers['Content-Type'] = 'application/json';
   const token = getToken();
   if (auth && token) headers.Authorization = `Bearer ${token}`;
 
   let res;
+  if (!quiet) setBusy(1);
   try {
     res = await fetch(`${P}${path}`, {
       method, headers,
@@ -46,6 +64,8 @@ async function call(path, { method = 'GET', body, auth = true, timeoutMs = 20000
     throw new ApiError(
       e.name === 'TimeoutError' ? 'The server is taking too long to answer.' : 'Cannot reach the server.',
       { code: 'offline' });
+  } finally {
+    if (!quiet) setBusy(-1);
   }
 
   const data = await res.json().catch(() => ({}));
@@ -98,12 +118,20 @@ export const api = {
   /* Polled every few seconds by the live screen, so it fails fast rather than
      leaving a watcher staring at a frozen page. */
   live: () => call('/live', { timeoutMs: 12000 }),
-  /* The small "has anything happened?" question, asked between refreshes. */
-  livePulse: () => call('/live/pulse', { timeoutMs: 8000 }),
+  /* The small "has anything happened?" question, asked between refreshes —
+     quiet, so the bar across the top is not flickering all day. */
+  livePulse: () => call('/live/pulse', { timeoutMs: 8000, quiet: true }),
   capacityToday: (placeId) => call(`/capacity/today${placeId ? `?placeId=${encodeURIComponent(placeId)}` : ''}`),
   capacitySet: (body) => call('/capacity/set', { method: 'POST', body }),
   capacityClose: (body) => call('/capacity/close', { method: 'POST', body, timeoutMs: 120000 }),
   capacityReopen: (body) => call('/capacity/reopen', { method: 'POST', body }),
+  /* How full the days ahead already are — see pages/Outlook.jsx. */
+  outlook: ({ days = 21, from = null, placeId = null } = {}) => {
+    const qs = new URLSearchParams({ days: String(days) });
+    if (from) qs.set('from', from);
+    if (placeId) qs.set('placeId', placeId);
+    return call(`/outlook?${qs}`);
+  },
   /* Older pages of the gate feed. `before` is the cursor the previous page
      returned — a time and an id, not an offset. */
   analytics: ({ from, to }) => call(`/analytics?from=${from}&to=${to}`),
@@ -116,6 +144,8 @@ export const api = {
   },
   analyticsVisitor: (id) => call(`/analytics/visitor/${encodeURIComponent(id)}`),
   analyticsPatterns: ({ from, to }) => call(`/analytics/patterns?from=${from}&to=${to}`),
+  /* Where the vehicles are registered — see components/Origins.jsx. */
+  analyticsOrigins: ({ from, to }) => call(`/analytics/origins?from=${from}&to=${to}`),
   analyticsStaffTrend: ({ from, to }) => call(`/analytics/staff-trend?from=${from}&to=${to}`),
   analyticsVehicle: (regNo) => call(`/analytics/vehicle/${encodeURIComponent(regNo)}`),
   negative: () => call('/negative'),

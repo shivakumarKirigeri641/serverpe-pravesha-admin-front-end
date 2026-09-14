@@ -28,12 +28,12 @@ import { Banner, Loading, when } from '../components/ui.jsx';
 
 const KIND_TONE = {
   rc: 'bg-good-50 text-good-700',
-  declared: 'bg-warn-50 text-warn-700',
+  declared: 'bg-watch-50 text-watch-700',
   no_plate: 'bg-wrong-50 text-wrong-700',
 };
 
 const METHOD_TONE = {
-  cash: 'bg-warn-50 text-warn-700',
+  cash: 'bg-watch-50 text-watch-700',
   upi: 'bg-brand-accent/10 text-brand-accent',
   card: 'bg-shell text-muted',
 };
@@ -107,7 +107,7 @@ export default function OnSpot() {
           {/* Cash first: it is the only figure somebody must physically hand over. */}
           <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
             {head.byMethod.map((m) => (
-              <div key={m.method} className={`card px-4 py-3 ${m.method === 'cash' ? 'ring-1 ring-warn-500/40' : ''}`}>
+              <div key={m.method} className={`card px-4 py-3 ${m.method === 'cash' ? 'ring-1 ring-watch-500/40' : ''}`}>
                 <div className="text-2xs uppercase tracking-wide text-muted">{m.label}</div>
                 <div className="mt-0.5 text-xl font-bold text-ink">{rupees(m.amount)}</div>
                 <div className="text-2xs text-muted">{number(m.sales)} sale{m.sales === 1 ? '' : 's'}</div>

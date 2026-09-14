@@ -75,7 +75,7 @@ export default function Watchlist() {
                     </button>
                   </td>
                   <td className="td">
-                    <span className={`chip ${w.level === 'block' ? 'bg-wrong-50 text-wrong-700' : 'bg-warn-50 text-warn-700'}`}>{w.level === 'block' ? 'Blocked' : 'Check carefully'}</span>
+                    <span className={`chip ${w.level === 'block' ? 'bg-wrong-50 text-wrong-700' : 'bg-watch-50 text-watch-700'}`}>{w.level === 'block' ? 'Blocked' : 'Check carefully'}</span>
                   </td>
                   <td className="td text-body">
                     {w.reason}

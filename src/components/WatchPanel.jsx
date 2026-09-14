@@ -93,7 +93,7 @@ export function WatchForm({ regNo: fixedPlate = null, current = null, onClose, o
       )}
       <div className="space-y-2">
         {LEVELS.map(([key, label, hint]) => (
-          <label key={key} className={`flex cursor-pointer gap-3 rounded-lg border px-3 py-2.5 ${level === key ? (key === 'block' ? 'border-wrong-500 bg-wrong-50' : 'border-warn-500 bg-warn-50') : 'border-line'}`}>
+          <label key={key} className={`flex cursor-pointer gap-3 rounded-lg border px-3 py-2.5 ${level === key ? (key === 'block' ? 'border-wrong-500 bg-wrong-50' : 'border-watch-500 bg-watch-50') : 'border-line'}`}>
             <input type="radio" name="level" className="mt-1" checked={level === key} onChange={() => setLevel(key)} />
             <span>
               <span className="block text-sm font-semibold text-ink">{label}</span>

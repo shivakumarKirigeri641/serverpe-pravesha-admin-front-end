@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard.jsx';
 import Live from './pages/Live.jsx';
+import Outlook from './pages/Outlook.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Conversations from './pages/Conversations.jsx';
 import Reports from './pages/Reports.jsx';
@@ -49,6 +50,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Dashboard />} />
       {can(me, 'live.view') && <Route path="/live" element={<Live />} />}
+      {can(me, 'dashboard.view') && <Route path="/outlook" element={<Outlook />} />}
       {can(me, 'analytics.view') && <Route path="/analytics" element={<Analytics />} />}
       {can(me, 'conversations.view') && <Route path="/conversations" element={<Conversations />} />}
       {can(me, 'reports.view') && <Route path="/reports" element={<Reports />} />}

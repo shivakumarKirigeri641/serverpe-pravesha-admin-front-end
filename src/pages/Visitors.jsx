@@ -23,15 +23,15 @@ const STATUS = {
   paid: ['Not used yet', 'bg-shell text-muted'],
   cancelled: ['Cancelled', 'bg-wrong-50 text-wrong-700'],
   expired: ['Abandoned at payment', 'bg-shell text-muted'],
-  held: ['Being paid for', 'bg-warn-50 text-warn-700'],
+  held: ['Being paid for', 'bg-watch-50 text-watch-700'],
 };
 
 const VERDICTS = {
   valid: ['Entered', 'bg-good-50 text-good-700'],
-  valid_override: ['Allowed outside slot', 'bg-warn-50 text-warn-700'],
+  valid_override: ['Allowed outside slot', 'bg-watch-50 text-watch-700'],
   already_used: ['Refused — already used', 'bg-wrong-50 text-wrong-700'],
   wrong_day: ['Refused — wrong day', 'bg-wrong-50 text-wrong-700'],
-  wrong_slot: ['Outside the slot', 'bg-warn-50 text-warn-700'],
+  wrong_slot: ['Outside the slot', 'bg-watch-50 text-watch-700'],
   wrong_place: ['Refused — wrong place', 'bg-wrong-50 text-wrong-700'],
   not_paid: ['Refused — not paid', 'bg-wrong-50 text-wrong-700'],
   unknown_ticket: ['Refused — no pass found', 'bg-wrong-50 text-wrong-700'],
@@ -171,7 +171,7 @@ function OneVisitor({ id }) {
                     <td className="td">
                       <button type="button" className="font-mono hover:underline" onClick={() => navigate(`/vehicles/${encodeURIComponent(p.regNo)}`)}>{plate(p.regNo)}</button>
                       <div className="text-2xs text-muted">{p.type}</div>
-                      {p.watch && <span className="chip bg-warn-50 text-warn-700">Watchlist</span>}
+                      {p.watch && <span className="chip bg-watch-50 text-watch-700">Watchlist</span>}
                     </td>
                     <td className="td text-2xs text-muted">{p.how}<div>booked {when(p.bookedAt)}</div></td>
                     <td className="td">
@@ -234,7 +234,7 @@ function OneVisitor({ id }) {
               <ul className="divide-y divide-line">
                 {data.feedback.map((f) => (
                   <li key={f.id} className="px-4 py-2.5">
-                    <div className="text-sm"><span className="text-warn-700">{'★'.repeat(f.rating)}{'☆'.repeat(Math.max(0, 5 - f.rating))}</span> <span className="text-2xs text-muted">{when(f.at)}{f.published ? ' · published' : ''}</span></div>
+                    <div className="text-sm"><span className="text-watch-700">{'★'.repeat(f.rating)}{'☆'.repeat(Math.max(0, 5 - f.rating))}</span> <span className="text-2xs text-muted">{when(f.at)}{f.published ? ' · published' : ''}</span></div>
                     {f.comment && <p className="mt-0.5 text-sm text-body">{f.comment}</p>}
                   </li>
                 ))}

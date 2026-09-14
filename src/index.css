@@ -28,7 +28,11 @@
   .label { @apply mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-muted; }
   .chip { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold; }
   .th { @apply px-4 py-2.5 text-left text-2xs font-semibold uppercase tracking-wider text-muted; }
-  .td { @apply px-4 py-3 text-sm; }
+  /* Top, not middle. A cell is a table cell: the browser centres its content
+     vertically, so one unusually tall cell in a row (a long list, a wrapped
+     note) pushes every short cell beside it down to the middle of that height —
+     off the screen entirely, and the row reads as blank. */
+  .td { @apply px-4 py-3 align-top text-sm; }
 
   /*
    * A word with its meaning one hover away — see components/Explain.jsx.
@@ -51,6 +55,28 @@
    * change (Rolling.jsx). Nothing loops, nothing bounces, and everything here is
    * off entirely for anybody who has asked for less motion.
    */
+  /*
+   * WAITING, SHOWN HONESTLY.
+   *
+   * A skeleton in the shape of what is coming, lit by a slow sweep rather than
+   * a flat blink: the sweep says the panel is still working, the shape says
+   * what it is working on, and together they stop the half-second of blank
+   * white that reads as a broken screen.
+   *
+   * The bar across the top is for the other case — a screen that already has
+   * figures on it and is fetching new ones. It creeps towards the right while
+   * the answer is outstanding and never quite arrives, because we do not know
+   * how long it will take; when the answer lands it runs to the end and fades.
+   */
+  .skeleton { @apply relative overflow-hidden rounded-lg bg-line/60; }
+  .skeleton::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .85), transparent);
+    transform: translateX(-100%);
+    animation: sweep 1.35s ease-in-out infinite;
+  }
+  .bar-creep { animation: creep 12s cubic-bezier(0, .6, .2, 1) forwards; }
+
   .page-in { animation: page-in .22s ease-out both; }
   /* A toast rises from where it will sit, rather than flying across the screen. */
   .toast-in { animation: toast-in .2s cubic-bezier(.2,.85,.25,1) both; }
@@ -62,9 +88,17 @@
 @keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes explain-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+/* Fast at first, then slower and slower: most answers arrive inside a second,
+   and a bar that has crawled to nine tenths is not lying about being nearly
+   there — it simply cannot promise when. */
+@keyframes creep {
+  0% { width: 0%; } 12% { width: 38%; } 35% { width: 62%; } 70% { width: 82%; } 100% { width: 93%; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .page-in, .explain-note, .toast-in { animation: none !important; }
+  .page-in, .explain-note, .toast-in, .skeleton::after, .bar-creep { animation: none !important; }
+  .bar-creep { width: 60% !important; }
   .card-hover, .row-hover, .tap { transition: none !important; }
   .card-hover:hover { transform: none !important; }
 }

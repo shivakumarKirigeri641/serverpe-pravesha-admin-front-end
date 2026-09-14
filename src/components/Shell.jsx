@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useSession, can } from '../lib/session';
+import { BusyBar } from './ui.jsx';
 
 /*
  * The frame every screen sits in: a fixed sidebar on a desk, a drawer on a
@@ -21,6 +22,7 @@ const NAV = [
     items: [
       { to: '/', label: 'Dashboard', icon: GridIcon, end: true, cap: 'dashboard.view' },
       { to: '/live', label: 'Live monitoring', icon: PulseIcon, cap: 'live.view' },
+      { to: '/outlook', label: 'Coming up', icon: CalendarIcon, cap: 'dashboard.view' },
       { to: '/analytics', label: 'Data analytics', icon: ChartIcon, cap: 'analytics.view' },
       { to: '/reports', label: 'Reports', icon: ReportIcon, cap: 'reports.view' },
       { to: '/negative', label: 'Negative tracking', icon: AlertIcon, cap: 'negative.view' },
@@ -82,6 +84,8 @@ export default function Shell({ title, subtitle, actions, onBack, backLabel = 'B
 
   return (
     <div className="min-h-screen lg:flex">
+      {/* While the panel is asking the server anything, a thread across the top. */}
+      <BusyBar />
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-64 shrink-0 border-r border-line bg-white transition-transform lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-14 items-center gap-2.5 border-b border-line px-5">
@@ -199,6 +203,7 @@ function ReportIcon(p) { return <Svg {...p}><path d="M6 3h9l4 4v14H6Z" /><path d
 function ChatIcon(p) { return <Svg {...p}><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" /><path d="M8.5 11h7M8.5 14h4" /></Svg>; }
 function ChartIcon(p) { return <Svg {...p}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></Svg>; }
 function PulseIcon(p) { return <Svg {...p}><path d="M3 12h4l3-8 4 16 3-8h4" /></Svg>; }
+function CalendarIcon(p) { return <Svg {...p}><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /><path d="M7.5 14h3M13.5 14h3M7.5 17.5h3" /></Svg>; }
 function TicketIcon(p) { return <Svg {...p}><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-6Z" /><path d="M13 5v14" strokeDasharray="2 3" /></Svg>; }
 function BellIcon(p) { return <Svg {...p}><path d="M18 16V11a6 6 0 1 0-12 0v5l-1.5 3h15Z" /><path d="M10 21a2 2 0 0 0 4 0" /></Svg>; }
 function SlidersIcon(p) { return <Svg {...p}><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="8" cy="18" r="2" /></Svg>; }
