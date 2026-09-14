@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Shell from '../components/Shell.jsx';
 import Photos from '../components/Photos.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { dayLabel, number, plate, rupees } from '../lib/format';
 import { Banner, Loading, when } from '../components/ui.jsx';
 
@@ -87,6 +88,7 @@ function VehicleList() {
   }, [term, kind, sort, page]);
 
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   const rows = data?.vehicles || [];
   const money = data ? !data.moneyHidden : false;

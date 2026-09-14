@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend as RLegend } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate } from '../lib/format';
@@ -54,6 +55,7 @@ export default function Payments() {
     try { setData(await api.paymentsOverview(params)); setError(null); } catch (e) { setError(e.message); } finally { setLoading(false); }
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   const p = data?.period;
 
@@ -244,6 +246,7 @@ function Settlements({ data, period, canRemit }) {
   const [adding, setAdding] = useState(false);
   const load = useCallback(() => api.remittances().then(setRem).catch(() => {}), []);
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   return (
     <Section title="Settlements" note="Razorpay to Pravesha’s bank, and Pravesha to the Tourism Department"

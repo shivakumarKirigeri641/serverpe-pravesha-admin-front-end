@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
 import { deliver } from '../lib/files';
 import { useSession, can } from '../lib/session';
@@ -46,6 +47,7 @@ export default function Finance() {
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   const p = data?.period;
   const canRecord = can(me, 'finance.expenses');
@@ -298,6 +300,7 @@ function Expenses({ period, canRecord, onChanged }) {
 
   const load = useCallback(() => api.expenses(period).then(setData).catch(() => setData({ expenses: [], categories: [] })), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   const changed = () => { setAdding(false); setRemoving(null); load(); onChanged(); };
   const total = (data?.expenses || []).reduce((a, e) => a + e.amount, 0);

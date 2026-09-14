@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
 import { clock, dayLabel, number, percent, plate, rupees, shiftDay } from '../lib/format';
 
@@ -49,6 +50,8 @@ export default function Dashboard() {
   }, [date]);
 
   useEffect(() => { load(); }, [load]);
+  /* Today's view catches up the moment a booking lands; a past day cannot change. */
+  usePulse(() => load({ quiet: true }), { enabled: !date || date === data?.today });
   useEffect(() => {
     const id = setInterval(() => { if (document.visibilityState === 'visible') load({ quiet: true }); }, REFRESH_MS);
     return () => clearInterval(id);

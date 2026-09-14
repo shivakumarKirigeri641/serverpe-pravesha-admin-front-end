@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
 import { useSession, can } from '../lib/session';
 import { clock, number, plate } from '../lib/format';
@@ -43,7 +44,8 @@ export default function Checkposts() {
 
   const load = useCallback(() => api.checkposts().then((d) => { setData(d); setError(null); }).catch((e) => setError(e.message)), []);
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { const t = setInterval(() => api.checkposts().then(setData).catch(() => {}), 30000); return () => clearInterval(t); }, []);
+  /* Redrawn when something happens at a gate or a booking lands, not every 30 seconds. */
+  usePulse(load);
 
   const canManage = can(me, 'destinations.manage');
 

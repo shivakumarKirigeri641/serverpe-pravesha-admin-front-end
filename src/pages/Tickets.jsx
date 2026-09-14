@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { deliver } from '../lib/files';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate, rupees } from '../lib/format';
@@ -156,6 +157,7 @@ function TicketDetail({ id, onBack }) {
     api.ticket(id).then((d) => { setData(d); setError(null); }).catch((e) => setError(e.message));
   }, [id]);
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   async function pass(action) {
     setBusy(action);
