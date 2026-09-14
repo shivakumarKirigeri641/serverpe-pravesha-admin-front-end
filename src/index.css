@@ -77,7 +77,11 @@
   }
   .bar-creep { animation: creep 12s cubic-bezier(0, .6, .2, 1) forwards; }
 
-  .page-in { animation: page-in .22s ease-out both; }
+  /* `backwards`, never `both`: an animation that keeps holding a transform
+     after it ends makes <main> the frame for everything position: fixed inside
+     it — every dialog and drawer then covers only the page content and is cut
+     off below it. Holding nothing afterwards leaves fixed meaning the window. */
+  .page-in { animation: page-in .22s ease-out backwards; }
   /* A toast rises from where it will sit, rather than flying across the screen. */
   .toast-in { animation: toast-in .2s cubic-bezier(.2,.85,.25,1) both; }
   .card-hover { @apply transition duration-150 hover:-translate-y-0.5 hover:shadow-pop; }

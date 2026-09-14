@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { plate } from '../lib/format';
 import { onBusyChange } from '../lib/api';
 
@@ -15,7 +16,10 @@ export function Modal({ title, subtitle, onClose, children, footer, wide = false
     return () => window.removeEventListener('keydown', key);
   }, [onClose, busy]);
 
-  return (
+  /* Drawn onto <body>, not where it is written: a dialog opened from inside a
+     card that is lifted on hover, or a page that is animating in, would
+     otherwise be positioned and clipped by that element instead of the window. */
+  return createPortal((
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 px-4 py-10" onClick={() => !busy && onClose()}>
       <div role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined}
         className={`card w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} shadow-pop`} onClick={(e) => e.stopPropagation()}>
@@ -30,7 +34,7 @@ export function Modal({ title, subtitle, onClose, children, footer, wide = false
         {footer && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line bg-shell/60 px-5 py-3">{footer}</div>}
       </div>
     </div>
-  );
+  ), document.body);
 }
 
 export function Field({ label, hint, children, className = '' }) {
