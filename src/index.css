@@ -29,4 +29,42 @@
   .chip { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold; }
   .th { @apply px-4 py-2.5 text-left text-2xs font-semibold uppercase tracking-wider text-muted; }
   .td { @apply px-4 py-3 text-sm; }
+
+  /*
+   * A word with its meaning one hover away — see components/Explain.jsx.
+   *
+   * The term carries a dotted underline and nothing else, so a screen full of
+   * them still reads as prose. The note sits above everything, is capped at a
+   * readable width, and is never wider than a phone.
+   */
+  .explain-term { @apply cursor-help border-b border-dotted border-muted/60 text-left transition-colors hover:border-brand hover:text-ink; }
+  .explain-note {
+    @apply absolute left-0 z-50 w-64 max-w-[80vw] rounded-lg border border-line bg-white px-3 py-2 text-left text-2xs font-normal normal-case leading-relaxed tracking-normal text-body shadow-pop;
+    animation: explain-in .14s ease-out;
+  }
+
+  /*
+   * MOVEMENT THAT MEANS SOMETHING, AND NOTHING ELSE.
+   *
+   * A screen watched all day must not fidget. So: a screen arrives with one
+   * short rise, rows and cards answer the pointer, and figures roll when they
+   * change (Rolling.jsx). Nothing loops, nothing bounces, and everything here is
+   * off entirely for anybody who has asked for less motion.
+   */
+  .page-in { animation: page-in .22s ease-out both; }
+  /* A toast rises from where it will sit, rather than flying across the screen. */
+  .toast-in { animation: toast-in .2s cubic-bezier(.2,.85,.25,1) both; }
+  .card-hover { @apply transition duration-150 hover:-translate-y-0.5 hover:shadow-pop; }
+  .row-hover { @apply transition-colors duration-150 hover:bg-shell; }
+  .tap { @apply transition active:scale-[.985]; }
+}
+
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes explain-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-in, .explain-note, .toast-in { animation: none !important; }
+  .card-hover, .row-hover, .tap { transition: none !important; }
+  .card-hover:hover { transform: none !important; }
 }

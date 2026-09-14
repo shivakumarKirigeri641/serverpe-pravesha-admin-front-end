@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number } from '../lib/format';
 import { Banner, Field, Loading, Modal, Reason, reasonOk, useAction, when } from '../components/ui.jsx';
@@ -55,6 +56,7 @@ export default function Notifications() {
     .then(([a, b]) => { setData(a); setAnn(b); setError(null); })
     .catch((e) => setError(e.message)), []);
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   /* A watched screen: refreshed every half-minute, without a spinner. */
   useEffect(() => {

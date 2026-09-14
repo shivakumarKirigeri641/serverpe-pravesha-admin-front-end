@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { useSession, can } from '../lib/session';
 import { clock, dayLabel, number, percent, plate } from '../lib/format';
 
@@ -75,6 +76,8 @@ export default function Negative() {
   }, [filter]);
 
   useEffect(() => { loadOverview(); }, [loadOverview]);
+  /* A refusal at a gate lands here within seconds, not at the next 15-second poll. */
+  usePulse(loadOverview);
   useEffect(() => {
     const id = setInterval(() => { if (document.visibilityState === 'visible') loadOverview(); }, POLL_MS);
     return () => clearInterval(id);

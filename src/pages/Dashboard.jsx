@@ -4,6 +4,7 @@ import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
 import usePulse from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
+import Explain from '../components/Explain.jsx';
 import { clock, dayLabel, number, percent, plate, rupees, shiftDay } from '../lib/format';
 
 /*
@@ -103,35 +104,32 @@ export default function Dashboard() {
 
       {data && (
         <div className="space-y-6">
-          <Group title="Today's bookings" hint="Passes paid for this date, whenever they were bought">
-            <Tile label="Total booked" stat={data.bookings.total} good="up" />
-            <Tile label="Advance" stat={data.bookings.advance} good="up" hint="Bought on an earlier day" />
-            <Tile label="Same day" stat={data.bookings.sameDay} good="up" hint="Bought on the day of travel" />
-            <Tile label="Abandoned at payment" stat={data.bookings.unpaidHolds} good="down"
-              hint="Place held, payment never completed" />
-          </Group>
+          <FigureTable title="Today's bookings" hint="Passes paid for this date, whenever they were bought" comparedWith={data.comparedWith} rows={[
+            { label: 'Total booked', stat: data.bookings.total, good: 'up' },
+            { label: 'Advance', stat: data.bookings.advance, good: 'up', hint: 'Bought on an earlier day' },
+            { label: 'Same day', stat: data.bookings.sameDay, good: 'up', hint: 'Bought on the day of travel' },
+            { label: 'Abandoned at payment', stat: data.bookings.unpaidHolds, good: 'down', hint: 'Place held, payment never completed' },
+          ]} />
 
-          <Group title="Visitor status" hint="Where today's passes stand right now">
-            <Tile label="Booked" stat={data.visitors.booked} good="up" />
-            <Tile label="Entered" stat={data.visitors.entered} good="up" hint="Recorded at a gate" />
-            <Tile label="Yet to arrive" stat={data.visitors.yetToArrive} good="neutral" hint="Slot still open" />
-            <Tile label="Skipped" stat={data.visitors.skipped} good="down" hint="No-show: slot has closed" />
-          </Group>
+          <FigureTable title="Visitor status" hint="Where today's passes stand right now" comparedWith={data.comparedWith} rows={[
+            { label: 'Booked', stat: data.visitors.booked, good: 'up' },
+            { label: 'Entered', stat: data.visitors.entered, good: 'up', hint: 'Recorded at a gate' },
+            { label: 'Yet to arrive', stat: data.visitors.yetToArrive, good: 'neutral', hint: 'Slot still open' },
+            { label: 'Skipped', stat: data.visitors.skipped, good: 'down', hint: 'No-show: slot has closed' },
+          ]} />
 
-          <Group title="Verification at the gate" hint="What staff checks returned">
-            <Tile label="Valid" stat={data.verification.valid} good="up" />
-            <Tile label="Used" stat={data.verification.used} good="up" hint="Entry recorded" />
-            <Tile label="Duplicate" stat={data.verification.duplicate} good="down" hint="Same pass presented twice" />
-            <Tile label="Invalid" stat={data.verification.invalid} good="down" hint="Wrong day, wrong gate, unpaid, unknown" />
-            <Tile label="Repeat attempt" stat={data.verification.repeatAttempt} good="down" hint="Refused, then tried again" />
-            <Tile label="Suspicious" stat={data.verification.suspicious} good="down" hint="Duplicates plus repeat attempts" />
-            <Tile label="Outside slot" stat={data.verification.outsideSlot} good="down"
-              hint="Arrived before or after their slot" />
-            <Tile label="Admitted anyway" stat={data.verification.allowedLate} good="down"
-              hint="Outside the slot, but staff allowed it" />
-            <Tile label="Vehicle mismatch" stat={data.verification.vehicleMismatch}
-              note="Staff look a vehicle up by its own number, so there is nothing to mismatch" />
-          </Group>
+          <FigureTable title="Verification at the gate" hint="What staff checks returned" comparedWith={data.comparedWith} rows={[
+            { label: 'Valid', stat: data.verification.valid, good: 'up' },
+            { label: 'Used', stat: data.verification.used, good: 'up', hint: 'Entry recorded' },
+            { label: 'Duplicate', stat: data.verification.duplicate, good: 'down', hint: 'Same pass presented twice' },
+            { label: 'Invalid', stat: data.verification.invalid, good: 'down', hint: 'Wrong day, wrong gate, unpaid, unknown' },
+            { label: 'Repeat attempt', stat: data.verification.repeatAttempt, good: 'down', hint: 'Refused, then tried again' },
+            { label: 'Suspicious', stat: data.verification.suspicious, good: 'down', hint: 'Duplicates plus repeat attempts' },
+            { label: 'Outside slot', stat: data.verification.outsideSlot, good: 'down', hint: 'Arrived before or after their slot' },
+            { label: 'Admitted anyway', stat: data.verification.allowedLate, good: 'down', hint: 'Outside the slot, but staff allowed it' },
+            { label: 'Vehicle mismatch', stat: data.verification.vehicleMismatch,
+              note: 'Staff look a vehicle up by its own number, so there is nothing to mismatch' },
+          ]} />
 
           <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
             <div className="card overflow-hidden">
@@ -196,7 +194,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-line">
                   {data.capacity.byVehicle.map((v) => (
-                    <tr key={v.code}>
+                    <tr key={v.code} className="row-hover">
                       <td className="td">
                         <span className="mr-2" aria-hidden>{VEHICLE_ICON[v.code] || '🚘'}</span>
                         <span className="font-medium text-ink">{v.label}</span>
@@ -278,6 +276,7 @@ const VERDICTS = {
   not_paid: ['Unpaid', 'bg-wrong-50 text-wrong-700'],
   cancelled: ['Cancelled', 'bg-wrong-50 text-wrong-700'],
   unknown_ticket: ['No such pass', 'bg-wrong-50 text-wrong-700'],
+  watch_blocked: ['Watchlist — blocked', 'bg-wrong-50 text-wrong-700'],
 };
 
 function VerdictChip({ verdict }) {
@@ -285,11 +284,59 @@ function VerdictChip({ verdict }) {
   return <span className={`chip ${tone}`}>{label}</span>;
 }
 
-function Group({ title, hint, children }) {
+/*
+ * A block of figures as a table, not as tiles.
+ *
+ * WHY A TABLE. These are the same shape of fact repeated — a count, what it was
+ * the day before, and which way that is — and a column of numbers in line with
+ * each other is read and compared far faster than the same numbers scattered
+ * across cards. It also leaves room for the sentence that says what each figure
+ * actually counts, which the tiles had nowhere to put.
+ *
+ * A DASH MEANS NOT MEASURED, and the sentence beside it says why, rather than a
+ * zero that reads as "nothing happened".
+ */
+function FigureTable({ title, hint, rows, comparedWith }) {
   return (
     <section>
       <SectionTitle label={title} hint={hint} />
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">{children}</div>
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[620px]">
+          <thead className="border-b border-line bg-shell">
+            <tr>
+              <th className="th">Figure</th>
+              <th className="th text-right">This day</th>
+              <th className="th text-right">{comparedWith ? dayLabel(comparedWith) : 'Day before'}</th>
+              <th className="th text-right">Change</th>
+              <th className="th">What it means</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {rows.map((r) => (
+              <tr key={r.label} className="row-hover">
+                <td className="td font-medium text-ink">
+                  {/* Hover, or tap on a phone, for how the figure is counted. */}
+                  <Explain term={r.label} />
+                </td>
+                {r.stat ? (
+                  <>
+                    <td className="td tabular text-right text-lg font-bold text-ink"><Rolling text={number(r.stat.value)} /></td>
+                    <td className="td tabular text-right text-muted">{number(r.stat.previous)}</td>
+                    <td className="td text-right"><Delta stat={r.stat} good={r.good} className="justify-end" /></td>
+                  </>
+                ) : (
+                  <>
+                    <td className="td text-right text-line">—</td>
+                    <td className="td text-right text-line">—</td>
+                    <td className="td" />
+                  </>
+                )}
+                <td className="td text-2xs text-muted">{r.hint || r.note || ''}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
@@ -348,32 +395,6 @@ function Delta({ stat, good = 'up', className = '' }) {
     <span className={`chip ${tone} ${className}`} title={`${stat.previous} yesterday`}>
       <span aria-hidden>{stat.direction === 'up' ? '▲' : '▼'}</span>{text}
     </span>
-  );
-}
-
-/** A figure that is not measured renders as a dash that explains itself. */
-function Tile({ label, stat, good, hint, note }) {
-  if (!stat) {
-    return (
-      <div className="card border-dashed p-4" title={note}>
-        <span className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</span>
-        <div className="mt-1.5 text-3xl font-bold leading-none text-line">—</div>
-        <div className="mt-2 text-2xs text-muted">{note || 'Not measured yet'}</div>
-      </div>
-    );
-  }
-  return (
-    <div className="card p-4">
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</span>
-        <Delta stat={stat} good={good} />
-      </div>
-      <div className="mt-1.5 tabular text-3xl font-bold leading-none text-ink"><Rolling text={number(stat.value)} /></div>
-      <div className="mt-2 text-2xs text-muted">
-        {hint && <>{hint}<span className="mx-1.5 text-line">|</span></>}
-        yesterday {number(stat.previous)}
-      </div>
-    </div>
   );
 }
 

@@ -3,6 +3,9 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import Shell from '../components/Shell.jsx';
+import Patterns from '../components/Patterns.jsx';
+import StaffTrend from '../components/StaffTrend.jsx';
+import { Plates } from '../components/ui.jsx';
 import { api } from '../lib/api';
 import { clock, dayLabel, number, percent, plate, rupees, shiftDay } from '../lib/format';
 
@@ -24,6 +27,7 @@ import { clock, dayLabel, number, percent, plate, rupees, shiftDay } from '../li
 
 const TABS = [
   ['traffic', 'Traffic'],
+  ['patterns', 'Patterns'],
   ['daily', 'Day-wise'],
   ['compare', 'Compare'],
   ['visitors', 'Visitors'],
@@ -76,7 +80,7 @@ export default function Analytics() {
 
   useEffect(() => { load(); }, [load]);
 
-  const usesRange = tab === 'traffic' || tab === 'daily' || tab === 'staff';
+  const usesRange = tab === 'traffic' || tab === 'patterns' || tab === 'daily' || tab === 'staff';
 
   return (
     <Shell
@@ -129,8 +133,14 @@ export default function Analytics() {
       {usesRange && loading && !data && <div className="card h-72 animate-pulse" />}
 
       {tab === 'traffic' && data && <Traffic data={data} loading={loading} />}
+      {tab === 'patterns' && range && <Patterns range={range} />}
       {tab === 'daily' && data && <Daily rows={data.daily} money={!data.financeHidden} />}
-      {tab === 'staff' && data && <Staff rows={data.staff} />}
+      {tab === 'staff' && data && (
+        <div className="space-y-5">
+          <Staff rows={data.staff} />
+          {range && <StaffTrend range={range} />}
+        </div>
+      )}
       {tab === 'compare' && <Compare today={today} />}
       {tab === 'visitors' && <Visitors bands={data?.visitors} />}
       {tab === 'vehicles' && <Vehicles />}
@@ -509,7 +519,7 @@ function Visitors({ bands }) {
               <tr key={v.id} className="cursor-pointer hover:bg-shell/60" onClick={() => setOpen(v.id)}>
                 <td className="td font-medium text-ink">{v.name || '—'}</td>
                 <td className="td font-mono text-muted">{v.mobile}</td>
-                <td className="td font-mono text-2xs text-body">{v.vehicles.map(plate).join(', ')}</td>
+                <td className="td font-mono text-2xs text-body"><Plates list={v.vehicles} /></td>
                 <td className="td tabular text-right font-semibold text-ink">{number(v.visits)}</td>
                 <td className="td"><Chip map={BAND} value={v.band} /></td>
                 <td className="td whitespace-nowrap text-muted">{v.firstVisit ? dayLabel(v.firstVisit) : '—'}</td>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Shell from '../components/Shell.jsx';
 import Photos from '../components/Photos.jsx';
+import WatchPanel from '../components/WatchPanel.jsx';
 import { api } from '../lib/api';
 import usePulse from '../lib/usePulse';
 import { dayLabel, number, plate, rupees } from '../lib/format';
@@ -46,6 +47,7 @@ const VERDICTS = {
   not_paid: ['Refused — not paid', 'bg-wrong-50 text-wrong-700'],
   unknown_ticket: ['No pass found', 'bg-wrong-50 text-wrong-700'],
   cancelled: ['Refused — cancelled', 'bg-wrong-50 text-wrong-700'],
+  watch_blocked: ['Refused — watchlist', 'bg-wrong-50 text-wrong-700'],
 };
 
 const STATUS = {
@@ -201,6 +203,9 @@ function OneVehicle({ regNo }) {
       backLabel="Vehicles"
       actions={<button type="button" className="btn-quiet" onClick={() => navigate('/vehicles')}>All vehicles</button>}
     >
+      {/* On the watchlist, or not — and the controls to change it. */}
+      <WatchPanel regNo={v.regNo} />
+
       {!v.allowed && (
         <Banner tone="wrong">This vehicle is not allowed entry{v.blockedReason ? ` — ${v.blockedReason}` : ''}.</Banner>
       )}

@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { clock, number, plate } from '../lib/format';
+import { useSession, can } from '../lib/session';
+import SlotControl from './SlotControl.jsx';
 
 /*
  * Today's slots on the live screen: for each, the first vehicle through the gate
@@ -12,6 +15,9 @@ import { clock, number, plate } from '../lib/format';
  * AN EMPTY HALF SAYS WHY. Before the slot opens, before anybody has come, or
  * when only one vehicle has entered so far — each is a different fact, and a
  * blank card would make all three look like a fault.
+ *
+ * AND THE DAY CAN BE CHANGED FROM HERE. "Manage today" opens the slot's places
+ * for each vehicle type and the switch to close it, for whoever may do that.
  */
 
 const VEHICLE_ICON = { BIKE: '🏍️', CAR: '🚗', TOOFAN: '🚙', TT: '🚐' };
@@ -25,36 +31,46 @@ const STATE = {
 /* "Morning 6:00 AM - 12:00 PM" -> "Morning" */
 const slotName = (label) => String(label || '').split(/\s+/)[0] || label;
 
-export default function SlotEntries({ slots }) {
+export default function SlotEntries({ slots, onChanged }) {
+  const { me } = useSession();
+  const [managing, setManaging] = useState(null);
+  const manage = can(me, 'capacity.today');
+
   if (!slots || slots.length === 0) {
     return (
       <div className="card px-4 py-8 text-center text-sm text-muted">No slots are running today.</div>
     );
   }
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
-      {slots.map((s) => <SlotSection key={s.slotId} slot={s} />)}
-    </div>
+    <>
+      <div className="grid gap-4 xl:grid-cols-2">
+        {slots.map((s) => <SlotSection key={s.slotId} slot={s} onManage={manage ? () => setManaging(s.slotId) : null} />)}
+      </div>
+      {managing && <SlotControl slotId={managing} onClose={() => setManaging(null)} onChanged={onChanged} />}
+    </>
   );
 }
 
-function SlotSection({ slot: s }) {
-  const [stateLabel, stateTone] = STATE[s.state] || STATE.open;
+function SlotSection({ slot: s, onManage }) {
+  const [stateLabel, stateTone] = s.closed ? ['Closed today', 'bg-wrong-50 text-wrong-700'] : (STATE[s.state] || STATE.open);
   return (
-    <section className="card overflow-hidden" aria-label={`${slotName(s.label)} slot`}>
+    <section className={`card card-hover overflow-hidden ${s.closed ? 'ring-1 ring-wrong-500/30' : ''}`} aria-label={`${slotName(s.label)} slot`}>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-ink">
             {slotName(s.label)} slot
             <span className="ml-2 font-normal text-muted">{s.startsAt}–{s.endsAt}</span>
           </h3>
-          <p className="text-2xs text-muted">{s.placeName}</p>
+          <p className="text-2xs text-muted">{s.placeName}{s.closed && s.closedNote ? ` · ${s.closedNote}` : ''}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-2xs text-muted">
             <b className="tabular text-ink">{number(s.entered)}</b> entered of <b className="tabular text-ink">{number(s.booked)}</b> booked
           </span>
           <span className={`chip ${stateTone}`}>{stateLabel}</span>
+          {onManage && (
+            <button type="button" className="btn-quiet !px-2.5 !py-1 text-2xs" onClick={onManage}>Manage today</button>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate } from '../lib/format';
 import { Banner, Field, Loading, Modal, Reason, reasonOk, useAction, when } from '../components/ui.jsx';
@@ -72,6 +73,7 @@ export default function Feedback() {
   }, [from, to, state, rating, term]);
 
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   const t = head?.totals;
 

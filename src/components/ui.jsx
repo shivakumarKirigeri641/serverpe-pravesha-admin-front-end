@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { plate } from '../lib/format';
 
 /*
  * The small pieces every settings screen is built from, so a change looks and
@@ -110,6 +111,32 @@ export const when = (iso) => {
     return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
   } catch { return String(iso); }
 };
+
+/*
+ * A visitor's vehicles, in one line.
+ *
+ * A fleet owner or a tour operator books under a single mobile number, so this
+ * list can run to hundreds of plates. Printed in full it turns the table row
+ * into a column of plates hundreds of lines tall and pushes every other figure
+ * off the screen. Two plates and a count instead; the rest are on the visitor's
+ * own page, and hovering shows the next few without going there.
+ */
+export function Plates({ list, shown = 2 }) {
+  const all = list || [];
+  if (all.length === 0) return <span className="text-muted">—</span>;
+  const rest = all.length - shown;
+  return (
+    <span className="whitespace-nowrap">
+      {all.slice(0, shown).map(plate).join(', ')}
+      {rest > 0 && (
+        <span className="ml-1 cursor-help text-muted"
+          title={all.slice(shown, shown + 40).map(plate).join(', ') + (rest > 40 ? `, and ${rest - 40} more` : '')}>
+          +{rest} more
+        </span>
+      )}
+    </span>
+  );
+}
 
 export function Loading({ rows = 4 }) {
   return (

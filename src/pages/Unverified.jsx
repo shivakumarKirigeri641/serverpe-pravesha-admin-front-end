@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate, rupees } from '../lib/format';
 import Rolling from '../components/Rolling.jsx';
@@ -99,6 +100,7 @@ export default function Unverified() {
     .then((d) => { setData(d); setError(null); })
     .catch((e) => setError(e.message)), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [load]);
+  usePulse(load);
 
   const t = data?.totals;
   const pages = data ? Math.max(1, Math.ceil(data.total / size)) : 1;

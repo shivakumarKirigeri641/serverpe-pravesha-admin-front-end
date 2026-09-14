@@ -220,6 +220,21 @@ function Activity({ person, onClose }) {
                     <div className="text-2xs text-muted">
                       {s.endedAt ? `ended ${clock(s.endedAt)}${s.endedReason ? ` · ${s.endedReason.replace(/_/g, ' ')}` : ''}` : 'still on duty'} · {s.checkpost || '—'}
                     </div>
+                    {s.summary && (
+                      <div className="mt-1 text-2xs text-body">
+                        {number(s.summary.checks)} checked · {number(s.summary.entries)} entered · {number(s.summary.refused)} refused
+                        {s.summary.overrides ? ` · ${number(s.summary.overrides)} allowed outside slot` : ''}
+                        {s.summary.sold.count > 0 && (
+                          <div>
+                            {number(s.summary.sold.count)} sold · ₹{number(s.summary.sold.total)}
+                            {' '}(cash ₹{number(s.summary.sold.cash)} · UPI ₹{number(s.summary.sold.upi)}{s.summary.sold.card ? ` · card ₹${number(s.summary.sold.card)}` : ''})
+                          </div>
+                        )}
+                        <span className={`chip mt-1 ${s.handedOver ? 'bg-good-50 text-good-700' : 'bg-shell text-muted'}`}>
+                          {s.handedOver ? 'Handed over at End shift' : s.endedAt ? 'Worked out from records' : 'So far'}
+                        </span>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

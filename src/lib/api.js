@@ -100,6 +100,10 @@ export const api = {
   live: () => call('/live', { timeoutMs: 12000 }),
   /* The small "has anything happened?" question, asked between refreshes. */
   livePulse: () => call('/live/pulse', { timeoutMs: 8000 }),
+  capacityToday: (placeId) => call(`/capacity/today${placeId ? `?placeId=${encodeURIComponent(placeId)}` : ''}`),
+  capacitySet: (body) => call('/capacity/set', { method: 'POST', body }),
+  capacityClose: (body) => call('/capacity/close', { method: 'POST', body, timeoutMs: 120000 }),
+  capacityReopen: (body) => call('/capacity/reopen', { method: 'POST', body }),
   /* Older pages of the gate feed. `before` is the cursor the previous page
      returned — a time and an id, not an offset. */
   analytics: ({ from, to }) => call(`/analytics?from=${from}&to=${to}`),
@@ -111,6 +115,8 @@ export const api = {
     return call(`/analytics/visitors?${qs}`);
   },
   analyticsVisitor: (id) => call(`/analytics/visitor/${encodeURIComponent(id)}`),
+  analyticsPatterns: ({ from, to }) => call(`/analytics/patterns?from=${from}&to=${to}`),
+  analyticsStaffTrend: ({ from, to }) => call(`/analytics/staff-trend?from=${from}&to=${to}`),
   analyticsVehicle: (regNo) => call(`/analytics/vehicle/${encodeURIComponent(regNo)}`),
   negative: () => call('/negative'),
   negativeEvents: ({ category, q, from, to, before, limit = 25 } = {}) => {
@@ -158,6 +164,12 @@ export const api = {
   vehicles: (params = {}) =>
     call(`/vehicles?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   vehicle: (regNo) => call(`/vehicles/${encodeURIComponent(regNo)}`),
+  watchlist: ({ removed = false } = {}) => call(`/watchlist${removed ? '?removed=1' : ''}`),
+  watchFor: (regNo) => call(`/watchlist/${encodeURIComponent(regNo)}`),
+  watchAdd: ({ regNo, level, reason }) => call('/watchlist', { method: 'POST', body: { regNo, level, reason } }),
+  watchRemove: (regNo, reason) => call(`/watchlist/${encodeURIComponent(regNo)}/remove`, { method: 'POST', body: { reason } }),
+  visitors: (q) => call(`/visitors?${new URLSearchParams({ q: q || '' })}`),
+  visitor: (id) => call(`/visitors/${encodeURIComponent(id)}`),
 
   /* Passes sold at a barrier: the totals a shift is reconciled against, and
      every sale behind them. */

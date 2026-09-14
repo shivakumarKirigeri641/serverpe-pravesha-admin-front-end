@@ -6,6 +6,7 @@ import {
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
 import Rolling from '../components/Rolling.jsx';
+import Explain from '../components/Explain.jsx';
 import SlotEntries from '../components/SlotEntries.jsx';
 import { clock, number, percent, plate } from '../lib/format';
 
@@ -175,46 +176,76 @@ export default function Live() {
           {/* A. Live visitor counter */}
           <section>
             <SectionTitle label="Visitors today" hint="Against yesterday at this hour" />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
-              <Counter label="Booked" stat={v.booked} good="up" />
-              <Counter label="Entered" stat={v.entered} good="up" hint="Entry recorded at a gate" />
-              <Counter label="Checked at gate" stat={v.checkedAtGate} good="up" hint="Passes looked up, however they ended" />
-              <Counter label="Yet to arrive" stat={v.yetToArrive} hint="Slot still open" />
-              <Counter label="Skipped" stat={v.skipped} good="down" hint="Slot closed, never came" />
-              <Counter label="Inside now" stat={v.inside} hint="Estimated — no exit is recorded" estimated />
-              <Counter label="Total entries" stat={v.totalEntries} good="up" hint="Including re-entries" />
+            <div className="card overflow-x-auto">
+              <table className="w-full min-w-[620px]">
+                <thead className="border-b border-line bg-shell">
+                  <tr>
+                    <th className="th">Figure</th>
+                    <th className="th text-right">Now</th>
+                    <th className="th text-right">Yesterday, this hour</th>
+                    <th className="th text-right">Change</th>
+                    <th className="th">What it means</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  <CounterRow label="Booked" stat={v.booked} good="up" />
+                  <CounterRow label="Entered" stat={v.entered} good="up" hint="Entry recorded at a gate" />
+                  <CounterRow label="Checked at gate" stat={v.checkedAtGate} good="up" hint="Passes looked up, however they ended" />
+                  <CounterRow label="Yet to arrive" stat={v.yetToArrive} hint="Slot still open" />
+                  <CounterRow label="Skipped" stat={v.skipped} good="down" hint="Slot closed, never came" />
+                  <CounterRow label="Inside now" stat={v.inside} hint="Estimated — no exit is recorded" estimated />
+                  <CounterRow label="Total entries" stat={v.totalEntries} good="up" hint="Including re-entries" />
+                </tbody>
+              </table>
             </div>
           </section>
 
           {/* B. Live vehicle counter */}
           <section>
             <SectionTitle label="Vehicles entered" hint="Share of today's traffic, and change on yesterday" />
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {data.vehicles.map((veh) => (
-                <div key={veh.code} className="card p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-wider text-muted">
-                      <span className="text-base" aria-hidden>{VEHICLE_ICON[veh.code] || '🚘'}</span>{veh.label}
-                    </span>
-                    <Delta stat={veh} good="up" />
-                  </div>
-                  <div className="mt-1.5 tabular text-3xl font-bold leading-none text-ink"><Rolling text={number(veh.value)} /></div>
-                  <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-shell">
-                    <div className="h-full rounded-full bg-brand-accent" style={{ width: `${veh.shareOfTraffic}%` }} />
-                  </div>
-                  <div className="mt-1.5 flex justify-between text-2xs text-muted">
-                    <span>{veh.shareOfTraffic}% of traffic</span>
-                    <span>yesterday {number(veh.previous)}</span>
-                  </div>
-                </div>
-              ))}
+            <div className="card overflow-x-auto">
+              <table className="w-full min-w-[620px]">
+                <thead className="border-b border-line bg-shell">
+                  <tr>
+                    <th className="th">Vehicle</th>
+                    <th className="th text-right">Entered</th>
+                    <th className="th">Share of traffic</th>
+                    <th className="th text-right">Yesterday</th>
+                    <th className="th text-right">Change</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {data.vehicles.map((veh) => (
+                    <tr key={veh.code}>
+                      <td className="td">
+                        <span className="mr-2 text-base" aria-hidden>{VEHICLE_ICON[veh.code] || '🚘'}</span>
+                        <span className="font-medium text-ink">{veh.label}</span>
+                      </td>
+                      <td className="td tabular text-right text-lg font-bold text-ink"><Rolling text={number(veh.value)} /></td>
+                      <td className="td">
+                        <span className="flex items-center gap-2">
+                          <span className="h-1.5 w-24 overflow-hidden rounded-full bg-shell">
+                            <span className="block h-full rounded-full bg-brand-accent" style={{ width: `${veh.shareOfTraffic}%` }} />
+                          </span>
+                          <span className="tabular text-2xs text-muted">{veh.shareOfTraffic}%</span>
+                        </span>
+                      </td>
+                      <td className="td tabular text-right text-muted">{number(veh.previous)}</td>
+                      <td className="td text-right"><Delta stat={veh} good="up" className="justify-end" /></td>
+                    </tr>
+                  ))}
+                  {data.vehicles.length === 0 && (
+                    <tr><td className="td text-center text-muted" colSpan={5}>No vehicle has entered yet today.</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </section>
 
           {/* Slots today: the first vehicle in and the latest, for each */}
           <section>
             <SectionTitle label="Slots today" hint="First and latest vehicle entered in each slot" />
-            <SlotEntries slots={data.slots} />
+            <SlotEntries slots={data.slots} onChanged={load} />
           </section>
 
           {/* C + D. Traffic graphs */}
@@ -292,7 +323,7 @@ export default function Live() {
                 </thead>
                 <tbody className="divide-y divide-line">
                   {data.staff.map((s) => (
-                    <tr key={s.id}>
+                    <tr key={s.id} className="row-hover">
                       <td className="td font-medium text-ink">{s.name}</td>
                       <td className="td text-muted">{s.checkpost || '—'}</td>
                       <td className="td"><StaffState staff={s} /></td>
@@ -388,6 +419,7 @@ const VERDICTS = {
   not_paid: ['Not paid', 'bg-wrong-50 text-wrong-700'],
   cancelled: ['Cancelled', 'bg-wrong-50 text-wrong-700'],
   unknown_ticket: ['Invalid pass', 'bg-wrong-50 text-wrong-700'],
+  watch_blocked: ['Watchlist — blocked', 'bg-wrong-50 text-wrong-700'],
 };
 
 function VerdictChip({ verdict }) {
@@ -442,19 +474,24 @@ function Delta({ stat, good = 'up', className = '' }) {
   );
 }
 
-function Counter({ label, stat, good, hint, estimated }) {
+/*
+ * One live figure as a row: the count now, the same hour yesterday, the change,
+ * and what the figure actually counts. Read down the column, the numbers line up
+ * — which is the whole point of a wall screen somebody glances at.
+ */
+function CounterRow({ label, stat, good, hint, estimated }) {
   return (
-    <div className="card p-4">
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-2xs font-semibold uppercase tracking-wider text-muted">{label}</span>
-        <Delta stat={stat} good={good} />
-      </div>
-      <div className="mt-1.5 flex items-baseline gap-1.5">
-        <span className="tabular text-3xl font-bold leading-none text-ink"><Rolling text={number(stat.value)} /></span>
-        {estimated && <span className="text-2xs font-semibold uppercase tracking-wider text-watch-700">est.</span>}
-      </div>
-      {hint && <div className="mt-2 text-2xs text-muted">{hint}</div>}
-    </div>
+    <tr className="row-hover">
+      <td className="td font-medium text-ink">
+        {/* Hover, or tap on a phone, for what this figure counts. */}
+        <Explain term={label} />
+        {estimated && <span className="chip ml-2 bg-watch-50 text-watch-700">est.</span>}
+      </td>
+      <td className="td tabular text-right text-lg font-bold text-ink"><Rolling text={number(stat.value)} /></td>
+      <td className="td tabular text-right text-muted">{stat.previous === undefined ? '—' : number(stat.previous)}</td>
+      <td className="td text-right"><Delta stat={stat} good={good} className="justify-end" /></td>
+      <td className="td text-2xs text-muted">{hint || ''}</td>
+    </tr>
   );
 }
 

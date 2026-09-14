@@ -26,11 +26,13 @@ const NAV = [
       { to: '/negative', label: 'Negative tracking', icon: AlertIcon, cap: 'negative.view' },
       { to: '/unverified', label: 'Unverified vehicles', icon: QueryIcon, cap: 'unverified.view' },
       { to: '/vehicles', label: 'Vehicles', icon: CarIcon, cap: 'vehicles.view', match: (path) => path.startsWith('/vehicles') },
+      { to: '/watchlist', label: 'Watchlist', icon: AlertIcon, cap: 'vehicles.view' },
     ],
   },
   {
     group: 'Operate',
     items: [
+      { to: '/visitors', label: 'Visitors', icon: UsersIcon, cap: 'tickets.view', match: (path) => path.startsWith('/visitors') },
       { to: '/conversations', label: 'Conversations', icon: ChatIcon, cap: 'conversations.view' },
       { to: '/settings/passes', label: 'Free & on-spot passes', icon: TicketIcon, cap: ['tickets.free', 'tickets.onspot'] },
       { to: '/tickets', label: 'Ticket management', icon: TicketIcon, cap: 'tickets.view', match: (path) => path.startsWith('/tickets') },
@@ -175,7 +177,9 @@ export default function Shell({ title, subtitle, actions, onBack, backLabel = 'B
           </div>
         </header>
 
-        <main className="px-4 py-6 sm:px-6">{children}</main>
+        {/* Keyed by the route, so arriving on a screen is one short rise rather
+            than a flicker — and nothing moves again while it is being read. */}
+        <main key={pathname} className="page-in px-4 py-6 sm:px-6">{children}</main>
       </div>
     </div>
   );
