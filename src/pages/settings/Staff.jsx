@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { clock, number, plate } from '../../lib/format';
-import { Banner, Field, Loading, Modal, Reason, reasonOk, Secret, Status, useAction, when } from '../../components/ui.jsx';
+import { Banner, Field, Loading, Modal, Reason, reasonOk, Status, useAction, when } from '../../components/ui.jsx';
 
 const VERDICT = {
   valid: ['Entered', 'bg-good-50 text-good-700'],
@@ -13,15 +13,15 @@ const VERDICT = {
 };
 
 /*
- * Checkpost staff — the people who use the gate app. They sign in with their
- * mobile and a six-digit PIN, and can only verify vehicles at the checkposts
- * they are posted to. A PIN is generated here and shown once.
+ * Checkpost staff — the people who use the gate app. There is no PIN: adding a
+ * mobile number here and keeping it enabled is what lets that phone receive a
+ * sign-in code, and they can only verify vehicles at the checkposts they are
+ * posted to. Disabling the number takes the gate away at once.
  */
 export default function Staff() {
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [dialog, setDialog] = useState(null);
-  const [secret, setSecret] = useState(null);
   const [done, setDone] = useState(null);
 
   const load = useCallback(() => api.staff().then((d) => { setData(d); setLoadError(null); }).catch((e) => setLoadError(e.message)), []);
@@ -30,11 +30,10 @@ export default function Staff() {
   if (loadError) return <Banner tone="wrong">{loadError}</Banner>;
   if (!data) return <Loading />;
 
-  const open = (kind, person = null) => { setDone(null); setSecret(null); setDialog({ kind, person }); };
-  const finished = (message, pin, person) => {
+  const open = (kind, person = null) => { setDone(null); setDialog({ kind, person }); };
+  const finished = (message) => {
     setDialog(null);
-    if (pin) setSecret({ pin, name: person });
-    else setDone(message);
+    setDone(message);
     load();
   };
 
@@ -43,13 +42,6 @@ export default function Staff() {
   return (
     <div className="space-y-5">
       {done && <Banner tone="good">{done}</Banner>}
-      {secret && (
-        <div className="space-y-2">
-          <Secret label={`Gate app PIN for ${secret.name}`} value={secret.pin}
-            note="Shown only this once. Give it to them in person or by phone; they sign in with their mobile number and this PIN." />
-          <button type="button" className="btn-quiet !py-1.5 text-2xs" onClick={() => setSecret(null)}>I have shared it</button>
-        </div>
-      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
@@ -87,9 +79,7 @@ export default function Staff() {
                 <td className="td">
                   <div className="flex justify-end gap-1.5">
                     <button type="button" className="btn-quiet !px-2.5 !py-1 text-2xs" onClick={() => open('activity', s)}>Activity</button>
-                    <button type="button" className="btn-quiet !px-2.5 !py-1 text-2xs" onClick={() => open('edit', s)}>Edit</button>
-                    <button type="button" className="btn-quiet !px-2.5 !py-1 text-2xs" onClick={() => open('pin', s)}>Reset PIN</button>
-                    <button type="button" className={`btn-quiet !px-2.5 !py-1 text-2xs ${s.active ? 'text-wrong-700' : 'text-good-700'}`}
+                    <button type="button" className="btn-quiet !px-2.5 !py-1 text-2xs" onClick={() => open('edit', s)}>Edit</button>                    <button type="button" className={`btn-quiet !px-2.5 !py-1 text-2xs ${s.active ? 'text-wrong-700' : 'text-good-700'}`}
                       onClick={() => open('active', s)}>{s.active ? 'Disable' : 'Enable'}</button>
                   </div>
                 </td>
@@ -100,18 +90,22 @@ export default function Staff() {
       </div>
 
       <Banner>
-        Gate staff can verify a vehicle, see the vehicle in hand and their own checks — nothing else. Disabling someone or resetting their PIN ends their shift on the gate app at once.
+        Staff sign in to the gate app with a 4-digit code sent by SMS to their mobile number — only an enabled number receives one. Gate staff can verify a vehicle, see the vehicle in hand and their own checks — nothing else. Disabling someone ends their shift on the gate app at once.
       </Banner>
 
       {dialog?.kind === 'add' && <StaffForm checkposts={data.checkposts} onClose={() => setDialog(null)} onSaved={finished} />}
       {dialog?.kind === 'edit' && <StaffForm person={dialog.person} checkposts={data.checkposts} onClose={() => setDialog(null)} onSaved={finished} />}
-      {dialog?.kind === 'pin' && <Confirm title="Reset PIN" person={dialog.person} action="Reset PIN"
-        text="A new six-digit PIN is generated and shown once. Their current shift on the gate app ends."
-        onClose={() => setDialog(null)} submit={(reason) => api.resetStaffPin(dialog.person.id, reason)}
-        onDone={(out) => finished(null, out.pin, dialog.person.name)} />}
-      {dialog?.kind === 'active' && <Confirm title={dialog.person.active ? 'Disable staff member' : 'Enable staff member'} person={dialog.person}
-        action={dialog.person.active ? 'Disable' : 'Enable'} danger={dialog.person.active}
-        text={dialog.person.active ? 'They will not be able to sign in to the gate app, and any shift in progress ends now. Their past checks stay on record.' : 'They will be able to sign in with their existing PIN.'}
+      {dialog?.kind === 'active' && <Confirm title={dialog.person.active ? 'Disable staff member?' : 'Enable staff member'} person={dialog.person}
+        action={dialog.person.active ? `Yes, disable ${dialog.person.name}` : 'Enable'} danger={dialog.person.active}
+        warning={dialog.person.active ? {
+          title: `Are you sure? This takes ${dialog.person.name} off the gate straight away.`,
+          points: [
+            dialog.person.onDutySince ? 'They are on duty right now — their shift ends the moment you confirm.' : 'Any shift they start is ended at once.',
+            `Their mobile (${dialog.person.mobile}) will stop receiving sign-in codes.`,
+            'If you tapped Disable by mistake, press Cancel.',
+          ],
+        } : null}
+        text={dialog.person.active ? 'They will not be able to sign in to the gate app, and any shift in progress ends now. Their past checks stay on record.' : 'Their mobile number will receive a sign-in code for the gate app again.'}
         onClose={() => setDialog(null)} submit={(reason) => api.setStaffActive(dialog.person.id, !dialog.person.active, reason)}
         onDone={() => finished(`${dialog.person.name} ${dialog.person.active ? 'disabled' : 'enabled'}.`)} />}
       {dialog?.kind === 'activity' && <Activity person={dialog.person} onClose={() => setDialog(null)} />}
@@ -132,20 +126,20 @@ function StaffForm({ person, checkposts, onClose, onSaved }) {
   async function save() {
     const body = { name, checkpostIds: [...posts], reason, ...(mobile ? { mobile } : {}) };
     const out = await run(() => (person ? api.updateStaff(person.id, body) : api.addStaff(body)));
-    if (out) person ? onSaved(`${out.staff.name} updated.`) : onSaved(null, out.pin, out.staff.name);
+    if (out) onSaved(person ? `${out.staff.name} updated.` : `${out.staff.name} added. They can sign in to the gate app with a code sent to their mobile.`);
   }
 
   return (
-    <Modal title={person ? `Edit ${person.name}` : 'Add a staff member'} subtitle={person ? undefined : 'A PIN is generated for them when you save'}
+    <Modal title={person ? `Edit ${person.name}` : 'Add a staff member'} subtitle={person ? undefined : 'Their mobile number is enabled to receive sign-in codes'}
       onClose={onClose} busy={busy}
       footer={<>
         <button type="button" className="btn-quiet" onClick={onClose} disabled={busy}>Cancel</button>
         <button type="button" className="btn-primary" onClick={save} disabled={busy || name.trim().length < 2 || !mobileOk || !posts.size || !reasonOk(reason)}>
-          {busy ? 'Saving…' : person ? 'Save changes' : 'Add and create PIN'}
+          {busy ? 'Saving…' : person ? 'Save changes' : 'Add and enable'}
         </button>
       </>}>
       <Field label="Full name"><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></Field>
-      <Field label="Mobile number" hint={person ? `Currently ${person.mobile}. Leave empty to keep it.` : 'They sign in with this number'}>
+      <Field label="Mobile number" hint={person ? `Currently ${person.mobile}. Leave empty to keep it.` : 'The sign-in code is sent to this number'}>
         <input className="input tabular" inputMode="numeric" maxLength={10} value={mobile} placeholder="10 digits"
           onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))} />
       </Field>
@@ -166,7 +160,16 @@ function StaffForm({ person, checkposts, onClose, onSaved }) {
   );
 }
 
-export function Confirm({ title, person, text, action, danger, submit, onDone, onClose }) {
+/*
+ * A change that needs a reason, asked for in a dialog.
+ *
+ * `warning` is for the ones that are easy to tap by accident and hurt when they
+ * are — disabling a person standing at a gate. It puts the consequences in a red
+ * box above the reason, so the dialog cannot be mistaken for a routine edit, and
+ * the button that carries it out sits away from Cancel and says exactly what it
+ * does.
+ */
+export function Confirm({ title, person, text, action, danger, warning, submit, onDone, onClose }) {
   const [reason, setReason] = useState('');
   const { busy, error, run } = useAction();
   return (
@@ -178,6 +181,17 @@ export function Confirm({ title, person, text, action, danger, submit, onDone, o
           {busy ? 'Working…' : action}
         </button>
       </>}>
+      {warning && (
+        <div role="alert" className="flex gap-3 rounded-lg border border-wrong-500/30 bg-wrong-50 px-4 py-3">
+          <span aria-hidden className="text-xl leading-none">⚠️</span>
+          <div className="min-w-0 text-sm text-wrong-700">
+            <div className="font-semibold">{warning.title}</div>
+            <ul className="mt-1 list-disc space-y-0.5 pl-4">
+              {warning.points.map((p) => <li key={p}>{p}</li>)}
+            </ul>
+          </div>
+        </div>
+      )}
       <p className="text-sm text-body">{text}</p>
       <Reason value={reason} onChange={setReason} />
       {error && <Banner tone="wrong">{error}</Banner>}

@@ -221,7 +221,6 @@ export const api = {
   addStaff: (body) => call('/settings/staff', { method: 'POST', body }),
   updateStaff: (id, body) => call(`/settings/staff/${id}`, { method: 'PUT', body }),
   setStaffActive: (id, active, reason) => call(`/settings/staff/${id}/active`, { method: 'POST', body: { active, reason } }),
-  resetStaffPin: (id, reason) => call(`/settings/staff/${id}/reset-pin`, { method: 'POST', body: { reason } }),
   staffActivity: (id) => call(`/settings/staff/${id}/activity`),
   users: () => call('/settings/users'),
   addUser: (body) => call('/settings/users', { method: 'POST', body }),

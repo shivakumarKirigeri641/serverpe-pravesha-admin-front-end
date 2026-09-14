@@ -22,7 +22,7 @@ import Reports from './settings/Reports.jsx';
 const TABS = [
   { key: 'pricing', label: 'Pricing', cap: 'settings.pricing', page: Pricing, blurb: 'Entry prices and the service fee' },
   { key: 'slots', label: 'Slots & capacity', cap: 'settings.slots', page: Slots, blurb: 'Hours, dates and places per vehicle type' },
-  { key: 'staff', label: 'Checkpost staff', cap: 'settings.staff', page: Staff, blurb: 'Gate app accounts, PINs and postings' },
+  { key: 'staff', label: 'Checkpost staff', cap: 'settings.staff', page: Staff, blurb: 'Who may sign in to the gate app, and where they are posted' },
   { key: 'passes', label: 'Free & on-spot passes', cap: ['tickets.free', 'tickets.onspot'], page: Passes, blurb: 'Passes issued from the panel' },
   { key: 'users', label: 'Panel users', cap: 'settings.users', page: Users, blurb: 'Who can sign in here, and as what' },
   { key: 'permissions', label: 'Roles & permissions', cap: null, page: Permissions, blurb: 'What each role may do' },
