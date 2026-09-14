@@ -310,7 +310,7 @@ function RunDialog({ action, onClose, onDone }) {
   const { busy, error, run } = useAction();
   const set = (k) => (e) => setOptions((o) => ({ ...o, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-  const ready = reasonOk(reason) && (!action.destructive || confirm.trim().toUpperCase() === 'REMOVE TEST DATA');
+  const ready = reasonOk(reason) && (!action.destructive || confirm.trim().toUpperCase() === 'CLEAN DATABASE');
 
   return (
     <Modal title={action.label} subtitle={action.destructive ? 'This cannot be undone' : undefined} onClose={onClose} busy={busy} wide
@@ -348,10 +348,9 @@ function RunDialog({ action, onClose, onDone }) {
       {action.destructive && (
         <>
           <Banner tone="wrong">
-            Every test pass, payment, invoice, gate check, vehicle, visitor and conversation is deleted, and the slot counters are reset.
-            Real rows — and the one real conversation — are left alone.
+            Everything is emptied — every pass, payment, invoice, gate check, shift, staff member, visitor, conversation, the watchlist, the vehicle cache and the other destinations — and the counters restart. Kept: the policies, the default destination with its pricing and the default checkpost (both enabled), panel users, settings and the audit trail. Staff numbers must be enabled again afterwards.
           </Banner>
-          <Field label="Type REMOVE TEST DATA to confirm">
+          <Field label="Type CLEAN DATABASE to confirm">
             <input className="input font-mono uppercase" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           </Field>
         </>
