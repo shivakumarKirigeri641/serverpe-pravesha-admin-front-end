@@ -6,6 +6,7 @@ import {
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
 import Rolling from '../components/Rolling.jsx';
+import SlotEntries from '../components/SlotEntries.jsx';
 import { clock, number, percent, plate } from '../lib/format';
 
 /*
@@ -208,6 +209,12 @@ export default function Live() {
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* Slots today: the first vehicle in and the latest, for each */}
+          <section>
+            <SectionTitle label="Slots today" hint="First and latest vehicle entered in each slot" />
+            <SlotEntries slots={data.slots} />
           </section>
 
           {/* C + D. Traffic graphs */}
