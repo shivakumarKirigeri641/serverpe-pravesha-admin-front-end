@@ -52,7 +52,7 @@ export default function Checkposts() {
   return (
     <Shell title="Checkposts — Entry Point Management"
       subtitle={data ? `${number(data.checkposts.filter((c) => c.status === 'manned').length)} manned now · open ${data.hours.opens}–${data.hours.closes}` : 'Entry points, staff on duty and live activity'}
-      actions={canManage && <button type="button" className="btn-primary !py-1.5 text-2xs" onClick={() => setDialog({ kind: 'new' })}>Add checkpost</button>}>
+      actions={canManage && <button type="button" className="btn-primary !py-1.5 text-2xs" disabled={!data} onClick={() => setDialog({ kind: 'new' })}>Add checkpost</button>}>
       {error && <Banner tone="wrong" className="mb-4">{error}</Banner>}
       {notice && <Banner tone="good" className="mb-4">{notice}</Banner>}
       {!data && !error && <Loading rows={3} />}
@@ -106,7 +106,8 @@ export default function Checkposts() {
       )}
 
       {open && <CheckpostDrawer id={open} onClose={() => setOpen(null)} />}
-      {dialog?.kind === 'new' && (
+      {/* The form needs the list of destinations, so it waits for the page to load. */}
+      {dialog?.kind === 'new' && data && (
         <CheckpostForm places={data.places.filter((p) => p.active)} onClose={() => setDialog(null)}
           onSaved={(out) => { setDialog(null); setNotice(`${out.checkpost.name} added at ${out.checkpost.place}. Post staff to it under Settings → Checkpost staff.`); load(); }} />
       )}
