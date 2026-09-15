@@ -104,6 +104,10 @@ async function file(path) {
 }
 
 export const api = {
+  /* Sign-in by a code (2026-09-15). Answered the same whether or not the number
+     is a panel user; the refusal, if any, comes when the code is typed. */
+  requestOtp: (mobile) => call('/session/otp', { method: 'POST', auth: false, body: { mobile } }),
+  verifyOtp: (mobile, code) => call('/session/verify', { method: 'POST', auth: false, body: { mobile, code } }),
   signIn: (mobile, password) =>
     call('/session', { method: 'POST', auth: false, body: { mobile, password } })
       .catch((e) => {

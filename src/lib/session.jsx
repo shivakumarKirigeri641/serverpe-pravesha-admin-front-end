@@ -37,6 +37,13 @@ export function SessionProvider({ children }) {
     return out;
   }, []);
 
+  /* The same session a password gives, reached with a code instead. */
+  const signInWithCode = useCallback(async (mobile, code) => {
+    const out = await api.verifyOtp(mobile, code);
+    if (out.ok) { setToken(out.token); setMe(out); setState('ready'); setNotice(null); }
+    return out;
+  }, []);
+
   const signOut = useCallback(async () => {
     try { await api.signOut(); } catch { /* the session ends locally regardless */ }
     setToken(null);
@@ -45,7 +52,7 @@ export function SessionProvider({ children }) {
     setNotice(null);
   }, []);
 
-  const value = useMemo(() => ({ me, state, signIn, signOut, notice }), [me, state, signIn, signOut, notice]);
+  const value = useMemo(() => ({ me, state, signIn, signInWithCode, signOut, notice }), [me, state, signIn, signInWithCode, signOut, notice]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
