@@ -3,6 +3,7 @@ import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { Banner, Field, Loading, Modal, Reason, reasonOk, Secret, Status, useAction, when } from '../../components/ui.jsx';
 import { Confirm } from './Staff.jsx';
+import AddPerson from './AddPerson.jsx';
 
 /*
  * Panel users — who can sign in to this admin panel, and as which role. Only a
@@ -44,7 +45,7 @@ export default function Users() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">{data.users.filter((u) => u.active).length} active panel users</p>
-        <button type="button" className="btn-primary" onClick={() => open('add')}>Add panel user</button>
+        <button type="button" className="btn-primary" onClick={() => open('add')}>Add a person</button>
       </div>
 
       <div className="card overflow-x-auto">
@@ -61,7 +62,15 @@ export default function Users() {
                     <div className="font-medium text-ink">{u.name}{self && <span className="chip ml-2 bg-brand/10 text-brand">You</span>}</div>
                     <div className="text-2xs text-muted">{u.mobile}</div>
                   </td>
-                  <td className="td text-sm text-ink">{u.roleLabel}</td>
+                  <td className="td text-sm text-ink">
+                    {u.role === 'checkpost_manager' ? 'Checkpost admin' : u.roleLabel}
+                    {/* The gate a checkpost admin runs — none means they are not limited to one. */}
+                    {u.role === 'checkpost_manager' && (
+                      <div className={`text-2xs ${u.checkpost ? 'text-muted' : 'font-semibold text-wrong-700'}`}>
+                        {u.checkpost ? `${u.checkpost.name} · ${u.checkpost.place}` : 'No checkpost assigned'}
+                      </div>
+                    )}
+                  </td>
                   <td className="td"><Status active={u.active} locked={u.locked} /></td>
                   <td className="td text-2xs text-muted">{when(u.lastLogin)}</td>
                   <td className="td tabular text-right">{u.openSessions}</td>
@@ -81,9 +90,16 @@ export default function Users() {
         </table>
       </div>
 
-      {(dialog?.kind === 'add' || dialog?.kind === 'edit') && (
-        <UserForm person={dialog.person} roles={data.roles} self={dialog.person?.id === String(me?.id)}
-          onClose={() => setDialog(null)} onSaved={finished} />
+      {/* Adding goes through the shared form, which verifies the number first. */}
+      {dialog?.kind === 'add' && (
+        <AddPerson onClose={() => setDialog(null)}
+          onDone={(out, name) => (out.password
+            ? finished(null, out.password, name)
+            : finished(`${name} added as checkpost staff. They can sign in to the gate app with their mobile number.`))} />
+      )}
+      {dialog?.kind === 'edit' && (
+        <UserForm person={dialog.person} roles={data.roles} checkposts={data.checkposts || []}
+          self={dialog.person?.id === String(me?.id)} onClose={() => setDialog(null)} onSaved={finished} />
       )}
       {dialog?.kind === 'password' && <Confirm title="Reset password" person={dialog.person} action="Reset password"
         text="A new password is generated and shown once. Every session they have open ends now."
@@ -98,16 +114,17 @@ export default function Users() {
   );
 }
 
-function UserForm({ person, roles, self, onClose, onSaved }) {
+function UserForm({ person, roles, checkposts, self, onClose, onSaved }) {
   const [name, setName] = useState(person?.name || '');
   const [mobile, setMobile] = useState('');
   const [role, setRole] = useState(person?.role || 'viewer');
+  const [gate, setGate] = useState(person?.checkpost?.id || '');
   const [reason, setReason] = useState('');
   const { busy, error, run } = useAction();
 
   async function save() {
     const out = await run(() => (person
-      ? api.updateUser(person.id, { name, role, reason })
+      ? api.updateUser(person.id, { name, role, reason, ...(role === 'checkpost_manager' ? { checkpostId: gate } : {}) })
       : api.addUser({ name, mobile, role, reason })));
     if (out) person ? onSaved(`${name} updated.`) : onSaved(null, out.password, out.user.name);
   }
@@ -118,7 +135,8 @@ function UserForm({ person, roles, self, onClose, onSaved }) {
       footer={<>
         <button type="button" className="btn-quiet" onClick={onClose} disabled={busy}>Cancel</button>
         <button type="button" className="btn-primary" onClick={save}
-          disabled={busy || name.trim().length < 2 || (!person && !/^\d{10}$/.test(mobile)) || !reasonOk(reason)}>
+          disabled={busy || name.trim().length < 2 || (!person && !/^\d{10}$/.test(mobile)) || !reasonOk(reason)
+            || (role === 'checkpost_manager' && !gate)}>
           {busy ? 'Saving…' : person ? 'Save changes' : 'Add and create password'}
         </button>
       </>}>
@@ -139,13 +157,23 @@ function UserForm({ person, roles, self, onClose, onSaved }) {
             <label key={r.key} className={`flex cursor-pointer gap-3 rounded-lg border px-3 py-2.5 ${role === r.key ? 'border-brand bg-brand/5' : 'border-line'} ${self ? 'cursor-not-allowed opacity-60' : ''}`}>
               <input type="radio" name="role" className="mt-1 h-4 w-4 accent-brand" checked={role === r.key} disabled={self} onChange={() => setRole(r.key)} />
               <span>
-                <span className="block text-sm font-semibold text-ink">{r.label}</span>
+                <span className="block text-sm font-semibold text-ink">{r.key === 'checkpost_manager' ? 'Checkpost admin' : r.label}</span>
                 <span className="block text-2xs text-muted">{r.description}</span>
               </span>
             </label>
           ))}
         </div>
       </div>
+      {/* A checkpost admin runs one gate; moving them signs them out. */}
+      {role === 'checkpost_manager' && (
+        <Field label="Checkpost they run"
+          hint={person?.checkpost && gate !== person.checkpost.id ? 'Changing it signs them out, so no open screen keeps showing the old gate.' : 'Their screens and their staff are limited to this gate'}>
+          <select className="input" value={gate} onChange={(e) => setGate(e.target.value)}>
+            <option value="">Choose a checkpost…</option>
+            {checkposts.map((c) => <option key={c.id} value={c.id}>{c.name} — {c.place}</option>)}
+          </select>
+        </Field>
+      )}
       <Reason value={reason} onChange={setReason} />
       {error && <Banner tone="wrong">{error}</Banner>}
     </Modal>

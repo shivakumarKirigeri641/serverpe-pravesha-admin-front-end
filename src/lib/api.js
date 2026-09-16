@@ -198,6 +198,15 @@ export const api = {
   vehicles: (params = {}) =>
     call(`/vehicles?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
   vehicle: (regNo) => call(`/vehicles/${encodeURIComponent(regNo)}`),
+  /* A paid lookup of one government record — RC, challans or FASTag. The
+     gateway can take several seconds on a cold cache. */
+  vehicleCheck: (regNo, dataset, page = null, { cached = false } = {}) => {
+    const qs = new URLSearchParams();
+    if (page) qs.set('page', String(page));
+    if (cached) qs.set('cached', '1');
+    return call(`/vehicle-check/${encodeURIComponent(regNo)}/${dataset}${qs.toString() ? `?${qs}` : ''}`,
+      { timeoutMs: 30000, quiet: cached });
+  },
   watchlist: ({ removed = false } = {}) => call(`/watchlist${removed ? '?removed=1' : ''}`),
   watchFor: (regNo) => call(`/watchlist/${encodeURIComponent(regNo)}`),
   watchAdd: ({ regNo, level, reason }) => call('/watchlist', { method: 'POST', body: { regNo, level, reason } }),
@@ -268,6 +277,12 @@ export const api = {
   updateStaff: (id, body) => call(`/settings/staff/${id}`, { method: 'PUT', body }),
   setStaffActive: (id, active, reason) => call(`/settings/staff/${id}/active`, { method: 'POST', body: { active, reason } }),
   staffActivity: (id) => call(`/settings/staff/${id}/activity`),
+  /* Adding a person (2026-09-16): name and mobile, a code to that mobile, then
+     the account — checkpost staff or a panel user, one form for both. */
+  peopleOptions: () => call('/settings/people/options'),
+  peopleCode: (mobile) => call('/settings/people/code', { method: 'POST', body: { mobile } }),
+  peopleVerify: (mobile, code) => call('/settings/people/verify', { method: 'POST', body: { mobile, code } }),
+  enrolPerson: (body) => call('/settings/people', { method: 'POST', body }),
   users: () => call('/settings/users'),
   addUser: (body) => call('/settings/users', { method: 'POST', body }),
   updateUser: (id, body) => call(`/settings/users/${id}`, { method: 'PUT', body }),

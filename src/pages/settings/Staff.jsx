@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { clock, number, plate } from '../../lib/format';
 import { Banner, Field, Loading, Modal, Reason, reasonOk, Status, useAction, when } from '../../components/ui.jsx';
+import AddPerson from './AddPerson.jsx';
 
 const VERDICT = {
   valid: ['Entered', 'bg-good-50 text-good-700'],
@@ -93,8 +94,15 @@ export default function Staff() {
         Staff sign in to the gate app with a 4-digit code sent by SMS to their mobile number — only an enabled number receives one. Gate staff can verify a vehicle, see the vehicle in hand and their own checks — nothing else. Disabling someone ends their shift on the gate app at once.
       </Banner>
 
-      {dialog?.kind === 'add' && <StaffForm checkposts={data.checkposts} onClose={() => setDialog(null)} onSaved={finished} />}
-      {dialog?.kind === 'edit' && <StaffForm person={dialog.person} checkposts={data.checkposts} onClose={() => setDialog(null)} onSaved={finished} />}
+      {/* Adding goes through the shared form, which verifies the number first. */}
+      {dialog?.kind === 'add' && (
+        <AddPerson prefer="staff" onClose={() => setDialog(null)}
+          onDone={(out, name) => finished(out.kind === 'staff'
+            ? `${name} added. They can sign in to the gate app with their mobile number.`
+            : `${name} added as a panel user.`)} />
+      )}
+      {dialog?.kind === 'edit' && <StaffForm person={dialog.person} checkposts={data.checkposts} fixed={data.fixedCheckpost}
+        onClose={() => setDialog(null)} onSaved={finished} />}
       {dialog?.kind === 'active' && <Confirm title={dialog.person.active ? 'Disable staff member?' : 'Enable staff member'} person={dialog.person}
         action={dialog.person.active ? `Yes, disable ${dialog.person.name}` : 'Enable'} danger={dialog.person.active}
         warning={dialog.person.active ? {
@@ -113,7 +121,7 @@ export default function Staff() {
   );
 }
 
-function StaffForm({ person, checkposts, onClose, onSaved }) {
+function StaffForm({ person, checkposts, fixed = null, onClose, onSaved }) {
   const [name, setName] = useState(person?.name || '');
   const [mobile, setMobile] = useState('');
   const [posts, setPosts] = useState(() => new Set((person?.checkposts || (checkposts.length === 1 ? checkposts : [])).map((c) => String(c.id))));
@@ -124,7 +132,8 @@ function StaffForm({ person, checkposts, onClose, onSaved }) {
   const mobileOk = person ? (mobile === '' || /^\d{10}$/.test(mobile)) : /^\d{10}$/.test(mobile);
 
   async function save() {
-    const body = { name, checkpostIds: [...posts], reason, ...(mobile ? { mobile } : {}) };
+    /* A checkpost admin does not re-post people: the server keeps them at this gate. */
+    const body = { name, reason, ...(fixed ? {} : { checkpostIds: [...posts] }), ...(mobile ? { mobile } : {}) };
     const out = await run(() => (person ? api.updateStaff(person.id, body) : api.addStaff(body)));
     if (out) onSaved(person ? `${out.staff.name} updated.` : `${out.staff.name} added. They can sign in to the gate app with a code sent to their mobile.`);
   }
@@ -134,7 +143,7 @@ function StaffForm({ person, checkposts, onClose, onSaved }) {
       onClose={onClose} busy={busy}
       footer={<>
         <button type="button" className="btn-quiet" onClick={onClose} disabled={busy}>Cancel</button>
-        <button type="button" className="btn-primary" onClick={save} disabled={busy || name.trim().length < 2 || !mobileOk || !posts.size || !reasonOk(reason)}>
+        <button type="button" className="btn-primary" onClick={save} disabled={busy || name.trim().length < 2 || !mobileOk || (!fixed && !posts.size) || !reasonOk(reason)}>
           {busy ? 'Saving…' : person ? 'Save changes' : 'Add and enable'}
         </button>
       </>}>
@@ -143,6 +152,9 @@ function StaffForm({ person, checkposts, onClose, onSaved }) {
         <input className="input tabular" inputMode="numeric" maxLength={10} value={mobile} placeholder="10 digits"
           onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))} />
       </Field>
+      {fixed ? (
+        <p className="text-sm text-body">Reports to <b className="text-ink">{checkposts[0]?.name}</b>.</p>
+      ) : (
       <div>
         <span className="label">Posted to</span>
         <div className="space-y-1.5">
@@ -154,6 +166,7 @@ function StaffForm({ person, checkposts, onClose, onSaved }) {
           ))}
         </div>
       </div>
+      )}
       <Reason value={reason} onChange={setReason} placeholder="e.g. Joined the gate team for the Dasara season" />
       {error && <Banner tone="wrong">{error}</Banner>}
     </Modal>
