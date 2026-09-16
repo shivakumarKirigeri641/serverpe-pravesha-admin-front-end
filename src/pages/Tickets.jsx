@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
-import usePulse from '../lib/usePulse';
+import usePulse, { usePulseTick } from '../lib/usePulse';
 import { deliver } from '../lib/files';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate, rupees } from '../lib/format';
@@ -49,7 +49,9 @@ function TicketSearch({ onOpen }) {
   const size = 25;
 
   useEffect(() => { const t = setTimeout(() => { setTerm(q.trim()); setPage(0); }, 350); return () => clearTimeout(t); }, [q]);
-  const key = JSON.stringify([term, state, range, page]);
+  /* A new or changed pass appears without a reload. */
+  const tick = usePulseTick();
+  const key = JSON.stringify([term, state, range, page, tick]);
 
   useEffect(() => {
     let alive = true;
@@ -188,7 +190,8 @@ function TicketDetail({ id, onBack }) {
             <div className="flex flex-wrap gap-2">
               <button type="button" className="btn-quiet" disabled={busy} onClick={() => pass('open')}>{busy === 'open' ? '…' : 'View pass'}</button>
               <button type="button" className="btn-quiet" disabled={busy} onClick={() => pass('save')}>{busy === 'save' ? '…' : 'Download'}</button>
-              {can(me, 'tickets.resend') && data.payment.paidAt && (
+              {/* A free pass has no payment, and is sent as the pass-issued template. */}
+              {can(me, 'tickets.resend') && (data.payment.paidAt || t.issuedAs === 'free') && (
                 <button type="button" className="btn-quiet" onClick={() => setDialog('resend')}>Send again</button>
               )}
               {can(me, 'tickets.cancel') && t.cancellable && (
@@ -288,7 +291,7 @@ function TicketDetail({ id, onBack }) {
           }} />
       )}
       {dialog === 'resend' && (
-        <ResendDialog ticket={t} mobile={data.visitor.mobile} onClose={() => setDialog(null)}
+        <ResendDialog ticket={t} mobile={data.visitor.mobile} free={t.issuedAs === 'free'} onClose={() => setDialog(null)}
           onDone={(out) => { setDialog(null); setNotice(out.message); load(); }} />
       )}
     </Shell>
@@ -330,7 +333,7 @@ function CancelDialog({ ticket, onClose, onDone }) {
   );
 }
 
-function ResendDialog({ ticket, mobile, onClose, onDone }) {
+function ResendDialog({ ticket, mobile, free, onClose, onDone }) {
   const [reason, setReason] = useState('');
   const { busy, error, run } = useAction();
   return (
@@ -343,7 +346,9 @@ function ResendDialog({ ticket, mobile, onClose, onDone }) {
         </button>
       </>}>
       <p className="text-sm text-body">
-        The message and the pass PDF go to the number on the pass and nowhere else.
+        {free
+          ? 'The pass details go to the number on the pass and nowhere else, with a button that opens the pass.'
+          : 'The message and the pass PDF go to the number on the pass and nowhere else. If the visitor has not written in the last 24 hours, WhatsApp only allows the pass details with a button that opens the pass, so that is sent instead.'}
       </p>
       <Field label="Note (optional)" hint="Recorded in the audit log with your name">
         <input className="input" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Visitor deleted the message" />

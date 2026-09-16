@@ -74,6 +74,8 @@ function PassForm({ kind, avail, date, onDate, onIssued }) {
   const [method, setMethod] = useState('cash');
   const [reference, setReference] = useState('');
   const [recordEntry, setRecordEntry] = useState(true);
+  /* Off by default: a free pass is often for somebody who should not be messaged. */
+  const [sendWhatsapp, setSendWhatsapp] = useState(false);
   const { busy, error, run } = useAction();
 
   const slots = useMemo(() => avail.slots.filter((s) => s.isOpen && ((free && date > avail.today) || !s.timeClosed)), [avail, free, date]);
@@ -87,9 +89,9 @@ function PassForm({ kind, avail, date, onDate, onIssued }) {
   async function issue() {
     const body = { placeId: avail.place.id, slotId, regNo, mobile, name };
     const out = await run(() => (free
-      ? api.issueFree({ ...body, travelDate: date, reasonCode, reason, approvedBy })
+      ? api.issueFree({ ...body, travelDate: date, reasonCode, reason, approvedBy, sendWhatsapp })
       : api.issueOnspot({ ...body, paymentMethod: method, paymentReference: reference, recordEntry })));
-    if (out) onIssued({ ...out.ticket, kind });
+    if (out) onIssued({ ...out.ticket, kind, whatsapp: out.whatsapp || null });
   }
 
   return (
@@ -183,6 +185,16 @@ function PassForm({ kind, avail, date, onDate, onIssued }) {
           </div>
         )}
 
+        {free && (
+          <label className="mt-4 flex items-start gap-2 text-sm text-ink">
+            <input type="checkbox" className="mt-0.5 h-4 w-4 accent-brand" checked={sendWhatsapp} onChange={(e) => setSendWhatsapp(e.target.checked)} />
+            <span>
+              Send the pass details to this number on WhatsApp
+              <span className="block text-2xs text-muted">Pass number, vehicle, place, date and slot, with a button that opens the pass.</span>
+            </span>
+          </label>
+        )}
+
         {error && <Banner tone="wrong" className="mt-4">{error}</Banner>}
         <div className="mt-5 flex justify-end">
           <button type="button" className="btn-primary" onClick={issue} disabled={!ready || busy}>
@@ -205,7 +217,7 @@ function PassForm({ kind, avail, date, onDate, onIssued }) {
           </tbody>
         </table>
         <p className="mt-3 text-2xs text-muted">
-          The vehicle type — and so the price — is decided by the registration, exactly as for a WhatsApp booking. The pass is not sent on WhatsApp; show or note the pass number for the visitor.
+          The vehicle type — and so the price — is decided by the registration, exactly as for a WhatsApp booking. {free ? 'The pass is sent on WhatsApp only if you tick the box; otherwise show or note the pass number for the visitor.' : 'The pass is not sent on WhatsApp; show or note the pass number for the visitor.'}
         </p>
       </aside>
     </div>
@@ -223,6 +235,9 @@ function Issued({ ticket, onAnother }) {
             <span className="font-mono">{plate(ticket.regNo)}</span> · {ticket.vehicleType}{ticket.vehicle ? ` · ${ticket.vehicle}` : ''}
           </p>
           <p className="text-sm text-body">{dayLabel(ticket.travelDate)} · {ticket.slot} · {ticket.visitor || 'Visitor'} {ticket.mobile}</p>
+          {ticket.whatsapp && (
+            <Banner tone={ticket.whatsapp.sent ? 'good' : 'watch'} className="mt-3">{ticket.whatsapp.message}</Banner>
+          )}
         </div>
         <div className="text-right">
           <div className="label">Amount</div>
