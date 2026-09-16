@@ -14,6 +14,7 @@ import Tickets from './pages/Tickets.jsx';
 import Notifications from './pages/Notifications.jsx';
 import Unverified from './pages/Unverified.jsx';
 import Vehicles from './pages/Vehicles.jsx';
+import CheckVehicle from './pages/CheckVehicle.jsx';
 import Watchlist from './pages/Watchlist.jsx';
 import Visitors from './pages/Visitors.jsx';
 import OnSpot from './pages/OnSpot.jsx';
@@ -61,6 +62,7 @@ export default function App() {
       {can(me, 'vehicles.view') && <Route path="/vehicles" element={<Vehicles />} />}
       {can(me, 'vehicles.view') && <Route path="/vehicles/:regNo" element={<Vehicles />} />}
       {can(me, 'vehicles.view') && <Route path="/watchlist" element={<Watchlist />} />}
+      {can(me, 'vehicles.check') && <Route path="/check-vehicle" element={<CheckVehicle />} />}
       {can(me, 'tickets.view') && <Route path="/visitors" element={<Visitors />} />}
       {can(me, 'tickets.view') && <Route path="/visitors/:id" element={<Visitors />} />}
       <Route path="/settings" element={<Settings />} />

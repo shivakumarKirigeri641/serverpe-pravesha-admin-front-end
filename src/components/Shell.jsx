@@ -29,6 +29,8 @@ const NAV = [
       { to: '/unverified', label: 'Unverified vehicles', icon: QueryIcon, cap: 'unverified.view' },
       { to: '/vehicles', label: 'Vehicles', icon: CarIcon, cap: 'vehicles.view', match: (path) => path.startsWith('/vehicles') },
       { to: '/watchlist', label: 'Watchlist', icon: AlertIcon, cap: 'vehicles.view' },
+      /* Super administrator only: a paid lookup of any plate's government records. */
+      { to: '/check-vehicle', label: 'Check vehicle', icon: ShieldIcon, cap: 'vehicles.check' },
     ],
   },
   {
