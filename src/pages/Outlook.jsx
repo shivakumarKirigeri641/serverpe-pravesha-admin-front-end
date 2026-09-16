@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Shell from '../components/Shell.jsx';
 import Explain from '../components/Explain.jsx';
 import { api } from '../lib/api';
+import usePulse from '../lib/usePulse';
 import { number } from '../lib/format';
 import { Banner, Loading, LoadingTable } from '../components/ui.jsx';
 
@@ -58,6 +59,8 @@ export default function Outlook() {
     try { setData(await api.outlook({ days })); setError(null); } catch (e) { setError(e.message); }
   }, [days]);
   useEffect(() => { setData(null); load(); }, [load]);
+  /* A booking for any day ahead moves these figures (user, 2026-09-16). */
+  usePulse(load);
 
   const t = data?.totals;
   const slotNames = data?.days.find((d) => d.slots.length)?.slots.map((s) => String(s.label).split(/\s+/)[0]) || [];

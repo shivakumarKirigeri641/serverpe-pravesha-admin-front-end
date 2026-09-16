@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
-import usePulse from '../lib/usePulse';
+import usePulse, { usePulseTick } from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
 import { deliver } from '../lib/files';
 import { useSession, can } from '../lib/session';
@@ -407,7 +407,9 @@ function Invoices({ period }) {
   /* A new period starts from its newest invoices. */
   const periodKey = JSON.stringify(period);
   useEffect(() => { setPage(0); }, [periodKey]);
-  const key = JSON.stringify([period, term, status, allDates, page]);
+  /* A new invoice appears without a reload (user, 2026-09-16). */
+  const tick = usePulseTick();
+  const key = JSON.stringify([period, term, status, allDates, page, tick]);
 
   useEffect(() => {
     let alive = true;

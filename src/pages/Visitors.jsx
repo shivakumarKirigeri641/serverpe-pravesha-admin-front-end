@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
+import { usePulseTick } from '../lib/usePulse';
 import { dayLabel, number, plate, rupees } from '../lib/format';
 import { Banner, Loading, Plates, when } from '../components/ui.jsx';
 
@@ -51,6 +52,8 @@ function Search() {
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
+  /* A visitor's new booking or entry shows without a reload. */
+  const tick = usePulseTick();
   useEffect(() => {
     const term = q.trim();
     if (term.length < 3) { setData(null); return undefined; }
@@ -59,7 +62,7 @@ function Search() {
       try { setData(await api.visitors(term)); setError(null); } catch (e) { setError(e.message); } finally { setBusy(false); }
     }, 300);
     return () => clearTimeout(tid);
-  }, [q]);
+  }, [q, tick]);
 
   const rows = data?.visitors || [];
 
@@ -104,6 +107,7 @@ function Search() {
 
 function OneVisitor({ id }) {
   const navigate = useNavigate();
+  const tick = usePulseTick();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -111,7 +115,7 @@ function OneVisitor({ id }) {
     let alive = true;
     api.visitor(id).then((d) => alive && setData(d)).catch((e) => alive && setError(e.message));
     return () => { alive = false; };
-  }, [id]);
+  }, [id, tick]);
 
   const back = () => (window.history.length > 1 ? navigate(-1) : navigate('/visitors'));
   if (error) return <Shell title="Visitor" onBack={back}><Banner tone="wrong">{error}</Banner></Shell>;

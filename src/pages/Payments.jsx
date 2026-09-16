@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend as RLegend } from 'recharts';
 import Shell from '../components/Shell.jsx';
 import { api } from '../lib/api';
-import usePulse from '../lib/usePulse';
+import usePulse, { usePulseTick } from '../lib/usePulse';
 import Rolling from '../components/Rolling.jsx';
 import { useSession, can } from '../lib/session';
 import { dayLabel, number, plate } from '../lib/format';
@@ -378,7 +378,9 @@ function PaymentList({ period, onOpen }) {
   useEffect(() => { const t = setTimeout(() => { setTerm(q.trim()); setPage(0); }, 350); return () => clearTimeout(t); }, [q]);
   const periodKey = JSON.stringify(period);
   useEffect(() => { setPage(0); }, [periodKey]);
-  const key = JSON.stringify([periodKey, term, state, allDates, page]);
+  /* A payment, a refund or a failed checkout appears without a reload. */
+  const tick = usePulseTick();
+  const key = JSON.stringify([periodKey, term, state, allDates, page, tick]);
 
   useEffect(() => {
     let alive = true;
