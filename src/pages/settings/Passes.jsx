@@ -81,7 +81,8 @@ function PassForm({ kind, avail, date, onDate, onIssued }) {
   const slots = useMemo(() => avail.slots.filter((s) => s.isOpen && ((free && date > avail.today) || !s.timeClosed)), [avail, free, date]);
   useEffect(() => { if (!slots.find((s) => s.slotId === slotId)) setSlotId(slots[0]?.slotId || ''); }, [slots, slotId]);
 
-  const plateOk = /^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{1,4}$|^\d{2}BH\d{4}[A-Z]{1,2}$/.test(regNo);
+  /* Old pre-1989 plates too — CRW1461 (user, 2026-09-17); the server checks the rest. */
+  const plateOk = /^[A-Z]{2}\d{1,2}[A-Z]{0,3}\d{1,4}$|^\d{2}BH\d{4}[A-Z]{1,2}$|^[A-Z]{2,3}\d{1,4}$/.test(regNo);
   const ready = slotId && plateOk && /^\d{10}$/.test(mobile) && (free
     ? reasonCode && reason.trim().length >= 5 && approvedBy
     : method === 'cash' || reference.trim().length >= 4);
