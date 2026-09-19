@@ -193,12 +193,57 @@ export default function Live() {
                   <CounterRow label="Checked at gate" stat={v.checkedAtGate} good="up" hint="Passes looked up, however they ended" />
                   <CounterRow label="Yet to arrive" stat={v.yetToArrive} hint="Slot still open" />
                   <CounterRow label="Skipped" stat={v.skipped} good="down" hint="Slot closed, never came" />
-                  <CounterRow label="Inside now" stat={v.inside} hint="Estimated — no exit is recorded" estimated />
+                  <CounterRow label="Inside now" stat={v.inside} hint="Entered today, not yet checked out" estimated={v.inside?.estimated} />
+                  {v.exited && <CounterRow label="Checked out" stat={v.exited} hint="Exit recorded at a gate" />}
+                  {v.notCheckedOut && <CounterRow label="Not checked out" stat={v.notCheckedOut} good="down" hint="Still inside after their slot ended" />}
                   <CounterRow label="Total entries" stat={v.totalEntries} good="up" hint="Including re-entries" />
                 </tbody>
               </table>
             </div>
           </section>
+
+          {/* Who is inside right now (063): the list an officer wants at closing
+              time or when the weather turns. Past their slot first, in red. */}
+          {Array.isArray(data?.inside) && (
+            <section>
+              <SectionTitle label={`Inside now · ${number(data.inside.length)}`}
+                hint={data.inside.some((r) => r.overdue)
+                  ? `${number(data.inside.filter((r) => r.overdue).length)} not checked out after their slot ended`
+                  : 'Entered today and not yet checked out'} />
+              <div className="card overflow-x-auto">
+                {data.inside.length === 0 ? (
+                  <p className="px-5 py-6 text-center text-sm text-muted">Nobody is inside right now.</p>
+                ) : (
+                  <table className="w-full min-w-[620px]">
+                    <thead className="border-b border-line bg-shell">
+                      <tr>
+                        <th className="th">Vehicle</th><th className="th">Visitor</th><th className="th">Slot</th>
+                        <th className="th">Entered</th><th className="th">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
+                      {data.inside.map((r) => (
+                        <tr key={r.ticketNo} className="row-hover">
+                          <td className="td">
+                            <div className="font-mono text-sm">{r.regNo ? plate(r.regNo) : `${number(r.persons || 1)} persons`}</div>
+                            <div className="text-2xs text-muted">{r.type} · {r.ticketNo}</div>
+                          </td>
+                          <td className="td text-sm">{r.visitor || '—'}<div className="text-2xs text-muted">{r.mobile}</div></td>
+                          <td className="td text-sm">{r.slot}<div className="text-2xs text-muted">ends {r.slotEnds}</div></td>
+                          <td className="td tabular text-sm">{clock(r.enteredAt)}</td>
+                          <td className="td">
+                            {r.overdue
+                              ? <span className="chip bg-wrong-50 text-wrong-700">Not checked out</span>
+                              : <span className="chip bg-good-50 text-good-700">Inside</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </section>
+          )}
 
           {/* B. Live vehicle counter */}
           <section>

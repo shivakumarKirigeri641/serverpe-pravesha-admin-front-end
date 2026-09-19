@@ -100,7 +100,7 @@ function TicketSearch({ onOpen }) {
           <thead className="border-b border-line bg-shell">
             <tr>
               <th className="th">Pass</th><th className="th">Visitor</th><th className="th">Vehicle</th><th className="th">Destination</th>
-              <th className="th">Visit</th><th className="th text-right">Amount</th><th className="th">Status</th><th className="th">Entry</th>
+              <th className="th">Visit</th><th className="th text-right">Amount</th><th className="th">Status</th><th className="th">Entry / exit</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -123,7 +123,10 @@ function TicketSearch({ onOpen }) {
                     <span className={`chip ${TONES[t.state] || 'bg-shell text-muted'}`}>{label}</span>
                     {t.partlyRefunded && <div className="mt-1 text-2xs text-watch-700">partly refunded</div>}
                   </td>
-                  <td className="td text-2xs text-muted">{t.enteredAt ? when(t.enteredAt) : '—'}</td>
+                  <td className="td text-2xs text-muted">
+                    {t.enteredAt ? when(t.enteredAt) : '—'}
+                    {t.exitedAt && <div>out {when(t.exitedAt)}</div>}
+                  </td>
                 </tr>
               );
             })}
@@ -194,6 +197,10 @@ function TicketDetail({ id, onBack }) {
               {can(me, 'tickets.resend') && (data.payment.paidAt || t.issuedAs === 'free') && (
                 <button type="button" className="btn-quiet" onClick={() => setDialog('resend')}>Send again</button>
               )}
+              {/* Postpone: a paid pass not yet used; the dialog says if the rules allow it now. */}
+              {can(me, 'tickets.postpone') && t.status === 'paid' && (
+                <button type="button" className="btn-quiet" onClick={() => setDialog('postpone')}>Postpone</button>
+              )}
               {can(me, 'tickets.cancel') && t.cancellable && (
                 <button type="button" className="btn-quiet text-wrong-700" onClick={() => setDialog('cancel')}>Cancel pass</button>
               )}
@@ -243,6 +250,13 @@ function TicketDetail({ id, onBack }) {
                 ? [['Recorded by', `The visitor, from their phone${data.entry.metresFromGate != null ? ` · ${data.entry.metresFromGate} m from the gate` : ''}`]]
                 : data.entry.source === 'gate' ? [['Recorded by', 'A staff member at the barrier']] : []),
               ['Attempts at the gate', number(data.entry.attempts.length)],
+              /* Check-out (063): when it came back out, and how long the visit was. */
+              ['Exited at', data.exit ? when(data.exit.at) : (data.entry.at ? 'Still inside, or exit not recorded' : '—')],
+              ...(data.exit ? [
+                ['Exit checkpost', [data.exit.checkpost, data.exit.staff].filter(Boolean).join(' · ') || '—'],
+                ['Time inside', data.exit.minutes == null ? '—'
+                  : data.exit.minutes >= 60 ? `${Math.floor(data.exit.minutes / 60)} h ${data.exit.minutes % 60} min` : `${data.exit.minutes} min`],
+              ] : []),
             ]} />
             {data.grant ? (
               <Panel title={data.grant.kind === 'free' ? 'Free pass' : 'On-spot sale'} rows={[
@@ -294,6 +308,10 @@ function TicketDetail({ id, onBack }) {
         <ResendDialog ticket={t} mobile={data.visitor.mobile} free={t.issuedAs === 'free'} onClose={() => setDialog(null)}
           onDone={(out) => { setDialog(null); setNotice(out.message); load(); }} />
       )}
+      {dialog === 'postpone' && (
+        <PostponeDialog ticket={t} onClose={() => setDialog(null)}
+          onDone={(out) => { setDialog(null); setNotice(`Pass postponed from ${out.from.date} to ${out.to.date} (${out.to.slotLabel}). The updated pass has been sent to the visitor.`); load(); }} />
+      )}
     </Shell>
   );
 }
@@ -329,6 +347,69 @@ function CancelDialog({ ticket, onClose, onDone }) {
       </p>
       <Reason value={reason} onChange={setReason} placeholder="e.g. Visitor called: booked the wrong date, rebooking for Sunday" />
       {error && <Banner tone="wrong">{error}</Banner>}
+    </Modal>
+  );
+}
+
+/*
+ * Postpone (user, 2026-09-19), for a visitor who asks by phone or at the desk.
+ * The same rules as the visitor's own page — shown here so nobody promises
+ * what the system will refuse — and a reason for the audit trail.
+ */
+function PostponeDialog({ ticket, onClose, onDone }) {
+  const [info, setInfo] = useState(null);
+  const [date, setDate] = useState('');
+  const [slots, setSlots] = useState([]);
+  const [slotId, setSlotId] = useState(null);
+  const [reason, setReason] = useState('');
+  const [loadError, setLoadError] = useState(null);
+  const { busy, error, run } = useAction();
+
+  useEffect(() => { api.postponeInfo(ticket.id).then(setInfo).catch((e) => setLoadError(e.message)); }, [ticket.id]);
+  useEffect(() => {
+    setSlotId(null); setSlots([]);
+    if (!date) return;
+    api.postponeInfo(ticket.id, date).then((d) => { setSlots(d.slots || []); setLoadError(d.slotsError || null); })
+      .catch((e) => setLoadError(e.message));
+  }, [ticket.id, date]);
+
+  const tag = (s) => (s.reason === 'current' ? 'current slot' : s.reason === 'full' ? 'full'
+    : s.reason === 'closed' ? 'closed' : s.reason === 'time' ? 'over' : `${s.remaining} left`);
+
+  return (
+    <Modal title="Postpone this pass" subtitle={ticket.ticketNo} onClose={onClose} busy={busy}
+      footer={<>
+        <button type="button" className="btn-quiet" onClick={onClose} disabled={busy}>Close</button>
+        <button type="button" className="btn-primary" disabled={busy || !info?.allowed || !date || !slotId || !reasonOk(reason)}
+          onClick={async () => { const out = await run(() => api.postponeTicket(ticket.id, { date, slotId, reason })); if (out) onDone(out); }}>
+          {busy ? 'Postponing…' : 'Postpone and send'}
+        </button>
+      </>}>
+      {!info && !loadError && <p className="text-sm text-muted">Checking the pass…</p>}
+      {info && !info.allowed && <Banner tone="wrong">{info.message}</Banner>}
+      {info?.allowed && (
+        <>
+          <Field label="New date" hint={`Between ${info.window.from} and ${info.window.to}`}>
+            <input type="date" className="input" min={info.window.from} max={info.window.to} value={date} onChange={(e) => setDate(e.target.value)} />
+          </Field>
+          {date && (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {slots.map((s) => (
+                <button key={s.slotId} type="button" disabled={!s.bookable} onClick={() => setSlotId(s.slotId)}
+                  className={`rounded-lg border px-3 py-2 text-left text-sm ${slotId === s.slotId ? 'border-brand bg-brand/10' : 'border-line'} disabled:opacity-50`}>
+                  <div className="font-medium text-ink">{s.label}</div>
+                  <div className="text-2xs text-muted">{tag(s)}</div>
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="rounded-lg bg-watch-50 px-3 py-2.5 text-xs text-watch-700">
+            <b>Postponement terms:</b> once per pass · until {info.rules.cutoffHours} hours before the booked slot · within {info.rules.windowDays} days · no fee and no refund · same pass number; the old date and slot are released.
+          </div>
+          <Reason value={reason} onChange={setReason} placeholder="e.g. Visitor called: rain forecast, moving to Sunday" />
+        </>
+      )}
+      {(loadError || error) && <Banner tone="wrong">{error || loadError}</Banner>}
     </Modal>
   );
 }

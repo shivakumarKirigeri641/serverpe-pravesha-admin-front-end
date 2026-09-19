@@ -250,6 +250,9 @@ export const api = {
   photoUrl: async (id) => URL.createObjectURL((await file(`/photo/${encodeURIComponent(id)}`)).blob),
   cancelTicket: (id, reason) => call(`/tickets/${id}/cancel`, { method: 'POST', body: { reason } }),
   resendTicket: (id, reason) => call(`/tickets/${id}/resend`, { method: 'POST', body: { reason } }),
+  /* Postpone (063): may it move, the window, and one date's slots with room. */
+  postponeInfo: (id, date) => call(`/tickets/${id}/postpone${date ? `?date=${date}` : ''}`),
+  postponeTicket: (id, { date, slotId, reason }) => call(`/tickets/${id}/postpone`, { method: 'POST', body: { date, slotId, reason } }),
   /* Payments & Settlements. */
   paymentsOverview: (params) => call(`/payments/overview?${new URLSearchParams(params)}`),
   paymentsList: (params) => call(`/payments/list?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ''))}`),
